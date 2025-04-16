@@ -31,7 +31,7 @@ const Header: React.FC = () => {
         
         <div className="flex-1 lg:flex-none">
           <Link to="/" className="block">
-            <h1 className="">ÖZEL ÇANTA</h1>
+            <h1 className="text-5xl text-zinc-950 font-bold">ÖZEL ÇANTA</h1>
           </Link>
         </div>
         
