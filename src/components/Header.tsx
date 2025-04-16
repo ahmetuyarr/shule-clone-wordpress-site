@@ -1,23 +1,18 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { ShoppingBag, Search, Menu, X, User, Heart } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-
 const Header: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [cartCount, setCartCount] = useState(0);
-
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 50);
     };
-
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
-
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
     if (!isMenuOpen) {
@@ -26,9 +21,7 @@ const Header: React.FC = () => {
       document.body.style.overflow = 'auto';
     }
   };
-
-  return (
-    <header className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 ${isScrolled ? 'bg-white shadow-sm py-2' : 'bg-transparent py-4'}`}>
+  return <header className="">
       <div className="shule-container flex items-center justify-between">
         <div className="lg:hidden">
           <button onClick={toggleMenu} className="p-2">
@@ -90,23 +83,14 @@ const Header: React.FC = () => {
           </Link>
           <Link to="/cart" className="p-1 relative">
             <ShoppingBag size={20} />
-            {cartCount > 0 && (
-              <span className="absolute -top-1 -right-1 bg-shule-brown text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">
+            {cartCount > 0 && <span className="absolute -top-1 -right-1 bg-shule-brown text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">
                 {cartCount}
-              </span>
-            )}
+              </span>}
           </Link>
         </div>
       </div>
       
-      {isMenuOpen && (
-        <div 
-          className="fixed inset-0 bg-black bg-opacity-50 z-30 lg:hidden"
-          onClick={toggleMenu}
-        />
-      )}
-    </header>
-  );
+      {isMenuOpen && <div className="fixed inset-0 bg-black bg-opacity-50 z-30 lg:hidden" onClick={toggleMenu} />}
+    </header>;
 };
-
 export default Header;
