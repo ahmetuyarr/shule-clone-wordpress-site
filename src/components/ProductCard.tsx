@@ -11,6 +11,9 @@ interface ProductCardProps {
   category: string;
   isNew?: boolean;
   isBestseller?: boolean;
+  isOnSale?: boolean;
+  salePrice?: number;
+  isFeatured?: boolean;
 }
 
 const ProductCard: React.FC<ProductCardProps> = ({
@@ -20,7 +23,10 @@ const ProductCard: React.FC<ProductCardProps> = ({
   image,
   category,
   isNew = false,
-  isBestseller = false
+  isBestseller = false,
+  isOnSale = false,
+  salePrice,
+  isFeatured = false
 }) => {
   return (
     <div className="shule-card group">
@@ -44,6 +50,16 @@ const ProductCard: React.FC<ProductCardProps> = ({
             Çok Satan
           </div>
         )}
+        {isOnSale && !isBestseller && (
+          <div className="absolute top-2 right-2 bg-red-500 text-white text-xs uppercase tracking-wider py-1 px-2">
+            İndirim
+          </div>
+        )}
+        {isFeatured && !isBestseller && !isOnSale && (
+          <div className="absolute top-2 right-2 bg-shule-brown text-white text-xs uppercase tracking-wider py-1 px-2">
+            Öne Çıkan
+          </div>
+        )}
         
         {/* Quick action buttons */}
         <div className="absolute bottom-4 left-0 right-0 flex justify-center space-x-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
@@ -61,7 +77,14 @@ const ProductCard: React.FC<ProductCardProps> = ({
         <Link to={`/products/${id}`} className="block mb-1 hover:text-shule-brown transition-colors">
           <h3 className="font-medium">{name}</h3>
         </Link>
-        <p className="font-medium">{price.toLocaleString('tr-TR')} TL</p>
+        {isOnSale && salePrice ? (
+          <div className="flex items-center space-x-2">
+            <p className="font-medium">{salePrice.toLocaleString('tr-TR')} TL</p>
+            <p className="text-sm line-through text-gray-500">{price.toLocaleString('tr-TR')} TL</p>
+          </div>
+        ) : (
+          <p className="font-medium">{price.toLocaleString('tr-TR')} TL</p>
+        )}
       </div>
     </div>
   );
