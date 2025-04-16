@@ -17,11 +17,6 @@ interface SiteInfo {
   [key: string]: string;
 }
 
-interface Settings {
-  id: string;
-  value: any;
-}
-
 const SettingsAdmin = () => {
   const [siteInfo, setSiteInfo] = useState<SiteInfo>({
     site_name: "",
@@ -50,7 +45,8 @@ const SettingsAdmin = () => {
       if (error) throw error;
       
       if (data && data.value) {
-        setSiteInfo(data.value);
+        // Veri tipini SiteInfo olarak belirterek ayarla
+        setSiteInfo(data.value as SiteInfo);
       }
     } catch (error) {
       console.error("Ayarlar yüklenirken hata oluştu:", error);

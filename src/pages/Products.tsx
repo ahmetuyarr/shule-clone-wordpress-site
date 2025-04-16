@@ -1,154 +1,126 @@
 
-import React, { useState } from 'react';
-import Header from '../components/Header';
-import Footer from '../components/Footer';
-import ProductCard from '../components/ProductCard';
-import { ChevronDown } from 'lucide-react';
+import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
+import Header from "@/components/Header";
+import Footer from "@/components/Footer";
+import ProductCard from "@/components/ProductCard";
+import { supabase } from "@/integrations/supabase/client";
 
-const Products: React.FC = () => {
-  const [filterOpen, setFilterOpen] = useState(false);
-  const [sortOpen, setSortOpen] = useState(false);
+const Products = () => {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-  const [selectedSort, setSelectedSort] = useState('newest');
+  const [sortOption, setSortOption] = useState("newest");
 
-  // Örnek ürün verileri
-  const allProducts = [
-    {
-      id: '1',
-      name: 'Bali Hasır Çanta',
-      price: 1250,
-      image: 'https://images.unsplash.com/photo-1590874103328-eac38a683ce7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3wxMjA3fDB8MXxzZWFyY2h8OHx8c3RyYXclMjBiYWd8ZW58MHx8fHwxNzE2MDYxNDM3fDA&ixlib=rb-4.0.3&q=80&w=1080',
-      category: 'Hasır Çanta',
-      isNew: true,
-    },
-    {
-      id: '2',
-      name: 'Tulum Hasır El Çantası',
-      price: 980,
-      image: 'https://images.unsplash.com/photo-1535140728325-a4d3707eee61?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3wxMjA3fDB8MXxzZWFyY2h8MTR8fHN0cmF3JTIwYmFnfGVufDB8fHx8MTcxNjA2MTQzN3ww&ixlib=rb-4.0.3&q=80&w=1080',
-      category: 'El Çantası',
-      isBestseller: true,
-    },
-    {
-      id: '3',
-      name: 'Marakeş Örgü Tote',
-      price: 1450,
-      image: 'https://images.unsplash.com/photo-1590739225497-56c33d413340?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3wxMjA3fDB8MXxzZWFyY2h8MzV8fHdvdmVuJTIwYmFnfGVufDB8fHx8MTcxNjA2MTY3NHww&ixlib=rb-4.0.3&q=80&w=1080',
-      category: 'Örgü Çanta',
-    },
-    {
-      id: '4',
-      name: 'Sardunya Mini Hasır',
-      price: 850,
-      image: 'https://images.unsplash.com/photo-1590874103328-eac38a683ce7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3wxMjA3fDB8MXxzZWFyY2h8OHx8c3RyYXclMjBiYWd8ZW58MHx8fHwxNzE2MDYxNDM3fDA&ixlib=rb-4.0.3&q=80&w=1080',
-      category: 'Mini Çanta',
-    },
-    {
-      id: '5',
-      name: 'Portofino Hasır Çanta',
-      price: 1350,
-      image: 'https://images.unsplash.com/photo-1590874103328-eac38a683ce7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3wxMjA3fDB8MXxzZWFyY2h8OHx8c3RyYXclMjBiYWd8ZW58MHx8fHwxNzE2MDYxNDM3fDA&ixlib=rb-4.0.3&q=80&w=1080',
-      category: 'Hasır Çanta',
-    },
-    {
-      id: '6',
-      name: 'Mykonos Mavi Hasır',
-      price: 1100,
-      image: 'https://images.unsplash.com/photo-1535140728325-a4d3707eee61?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3wxMjA3fDB8MXxzZWFyY2h8MTR8fHN0cmF3JTIwYmFnfGVufDB8fHx8MTcxNjA2MTQzN3ww&ixlib=rb-4.0.3&q=80&w=1080',
-      category: 'Hasır Çanta',
-      isNew: true,
-    },
-    {
-      id: '7',
-      name: 'Bali Örgü Plaj Çantası',
-      price: 1550,
-      image: 'https://images.unsplash.com/photo-1590739225497-56c33d413340?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3wxMjA3fDB8MXxzZWFyY2h8MzV8fHdvdmVuJTIwYmFnfGVufDB8fHx8MTcxNjA2MTY3NHww&ixlib=rb-4.0.3&q=80&w=1080',
-      category: 'Örgü Çanta',
-    },
-    {
-      id: '8',
-      name: 'Maldiv Mini Örgü',
-      price: 950,
-      image: 'https://images.unsplash.com/photo-1535140728325-a4d3707eee61?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3wxMjA3fDB8MXxzZWFyY2h8MTR8fHN0cmF3JTIwYmFnfGVufDB8fHx8MTcxNjA2MTQzN3ww&ixlib=rb-4.0.3&q=80&w=1080',
-      category: 'Mini Çanta',
-      isBestseller: true,
-    },
-  ];
-
-  // Kategorileri oluştur
-  const categories = [...new Set(allProducts.map(product => product.category))];
-  
-  // Filtreleme işlemi
-  const filteredProducts = selectedCategory 
-    ? allProducts.filter(product => product.category === selectedCategory) 
-    : allProducts;
-    
-  // Sıralama işlemi
-  const sortedProducts = [...filteredProducts].sort((a, b) => {
-    if (selectedSort === 'price-asc') {
-      return a.price - b.price;
-    } else if (selectedSort === 'price-desc') {
-      return b.price - a.price;
-    } else if (selectedSort === 'name-asc') {
-      return a.name.localeCompare(b.name);
-    } else if (selectedSort === 'name-desc') {
-      return b.name.localeCompare(a.name);
+  // Ürünleri Supabase'den çek
+  const { data: products = [], isLoading } = useQuery({
+    queryKey: ['products'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('products')
+        .select('*');
+      
+      if (error) {
+        console.error('Ürünler yüklenirken hata:', error);
+        return [];
+      }
+      
+      return data || [];
     }
-    // Varsayılan olarak en yeniler
-    return 0;
   });
 
-  const toggleFilter = () => {
-    setFilterOpen(!filterOpen);
-    if (sortOpen) setSortOpen(false);
-  };
+  // Kategorileri Supabase'den çek
+  const { data: categories = [] } = useQuery({
+    queryKey: ['categories'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('products')
+        .select('category')
+        .order('category');
+      
+      if (error) {
+        console.error('Kategoriler yüklenirken hata:', error);
+        return [];
+      }
 
-  const toggleSort = () => {
-    setSortOpen(!sortOpen);
-    if (filterOpen) setFilterOpen(false);
-  };
+      // Benzersiz kategorileri döndür
+      const uniqueCategories = Array.from(new Set(data.map(item => item.category)));
+      return uniqueCategories || [];
+    }
+  });
+
+  // Filtrelenmiş ve sıralanmış ürünleri hazırla
+  const filteredProducts = products.filter(product => 
+    !selectedCategory || product.category === selectedCategory
+  );
+
+  // Sıralama işlemi
+  const sortedProducts = [...filteredProducts].sort((a, b) => {
+    switch (sortOption) {
+      case "price-low":
+        return a.price - b.price;
+      case "price-high":
+        return b.price - a.price;
+      case "name":
+        return a.name.localeCompare(b.name);
+      case "newest":
+      default:
+        return new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime();
+    }
+  });
+
+  // Mobil filtre görünümü için
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
 
   return (
-    <>
+    <div className="flex flex-col min-h-screen">
       <Header />
-      <main className="pt-24">
-        {/* Hero Banner */}
-        <div className="bg-shule-beige py-14">
+      <main className="flex-grow pt-24 pb-16">
+        <div className="bg-shule-lightGrey py-3">
           <div className="shule-container">
-            <h1 className="shule-heading text-center">Ürünlerimiz</h1>
+            <nav className="flex items-center text-sm">
+              <Link to="/" className="text-gray-500 hover:text-gray-700">
+                Ana Sayfa
+              </Link>
+              <span className="mx-2">&#8250;</span>
+              <span className="font-medium">Ürünler</span>
+            </nav>
           </div>
         </div>
-        
-        {/* Filtre ve Sıralama Bölümü */}
-        <div className="border-b border-shule-grey">
-          <div className="shule-container flex justify-between py-4">
-            <div className="relative">
-              <button 
-                className="flex items-center space-x-2 uppercase text-sm font-medium"
-                onClick={toggleFilter}
-              >
-                <span>Filtrele</span>
-                <ChevronDown size={16} className={`transition-transform ${filterOpen ? 'rotate-180' : ''}`} />
-              </button>
-              
-              {filterOpen && (
-                <div className="absolute left-0 top-full bg-white shadow-md min-w-48 z-20 border border-shule-grey">
-                  <div className="p-4">
-                    <h3 className="font-medium mb-2">Kategoriler</h3>
+
+        <div className="shule-container py-12">
+          <div className="flex flex-col space-y-6 lg:space-y-0 lg:flex-row lg:space-x-8">
+            {/* Sol Filtreler */}
+            <div className="lg:w-1/4">
+              <div className="mb-6 lg:sticky lg:top-24">
+                <div className="flex items-center justify-between mb-4 lg:hidden">
+                  <h2 className="font-medium">Filtreler</h2>
+                  <button 
+                    onClick={() => setIsFilterOpen(!isFilterOpen)}
+                    className="focus:outline-none"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-chevron-down">
+                      <path d="m6 9 6 6 6-6"/>
+                    </svg>
+                  </button>
+                </div>
+                
+                <div className={`${isFilterOpen ? 'block' : 'hidden'} lg:block space-y-6`}>
+                  <div>
+                    <h3 className="text-lg font-playfair mb-3">Kategoriler</h3>
                     <ul className="space-y-2">
                       <li>
                         <button 
-                          className={`text-sm ${selectedCategory === null ? 'font-medium text-shule-brown' : ''}`}
                           onClick={() => setSelectedCategory(null)}
+                          className={`flex items-center w-full text-left ${!selectedCategory ? 'font-medium text-shule-brown' : ''}`}
                         >
                           Tümü
                         </button>
                       </li>
-                      {categories.map((category) => (
-                        <li key={category}>
+                      {categories.map((category, index) => (
+                        <li key={index}>
                           <button 
-                            className={`text-sm ${selectedCategory === category ? 'font-medium text-shule-brown' : ''}`}
                             onClick={() => setSelectedCategory(category)}
+                            className={`flex items-center w-full text-left ${selectedCategory === category ? 'font-medium text-shule-brown' : ''}`}
                           >
                             {category}
                           </button>
@@ -157,100 +129,68 @@ const Products: React.FC = () => {
                     </ul>
                   </div>
                 </div>
-              )}
+              </div>
             </div>
             
-            <div className="relative">
-              <button 
-                className="flex items-center space-x-2 uppercase text-sm font-medium"
-                onClick={toggleSort}
-              >
-                <span>Sırala</span>
-                <ChevronDown size={16} className={`transition-transform ${sortOpen ? 'rotate-180' : ''}`} />
-              </button>
-              
-              {sortOpen && (
-                <div className="absolute right-0 top-full bg-white shadow-md min-w-48 z-20 border border-shule-grey">
-                  <div className="p-4">
-                    <ul className="space-y-2">
-                      <li>
-                        <button 
-                          className={`text-sm ${selectedSort === 'newest' ? 'font-medium text-shule-brown' : ''}`}
-                          onClick={() => setSelectedSort('newest')}
-                        >
-                          En Yeniler
-                        </button>
-                      </li>
-                      <li>
-                        <button 
-                          className={`text-sm ${selectedSort === 'price-asc' ? 'font-medium text-shule-brown' : ''}`}
-                          onClick={() => setSelectedSort('price-asc')}
-                        >
-                          Fiyat: Düşükten Yükseğe
-                        </button>
-                      </li>
-                      <li>
-                        <button 
-                          className={`text-sm ${selectedSort === 'price-desc' ? 'font-medium text-shule-brown' : ''}`}
-                          onClick={() => setSelectedSort('price-desc')}
-                        >
-                          Fiyat: Yüksekten Düşüğe
-                        </button>
-                      </li>
-                      <li>
-                        <button 
-                          className={`text-sm ${selectedSort === 'name-asc' ? 'font-medium text-shule-brown' : ''}`}
-                          onClick={() => setSelectedSort('name-asc')}
-                        >
-                          İsim: A-Z
-                        </button>
-                      </li>
-                      <li>
-                        <button 
-                          className={`text-sm ${selectedSort === 'name-desc' ? 'font-medium text-shule-brown' : ''}`}
-                          onClick={() => setSelectedSort('name-desc')}
-                        >
-                          İsim: Z-A
-                        </button>
-                      </li>
-                    </ul>
-                  </div>
+            {/* Sağ Ürünler */}
+            <div className="lg:w-3/4">
+              <div className="flex flex-col md:flex-row md:items-center justify-between mb-6">
+                <h1 className="shule-heading mb-3 md:mb-0">
+                  Ürünler
+                </h1>
+                
+                <div className="flex items-center space-x-4">
+                  <select 
+                    className="shule-input py-1 px-2"
+                    value={sortOption}
+                    onChange={(e) => setSortOption(e.target.value)}
+                  >
+                    <option value="newest">En Yeniler</option>
+                    <option value="price-low">Fiyata Göre (Artan)</option>
+                    <option value="price-high">Fiyata Göre (Azalan)</option>
+                    <option value="name">İsme Göre (A-Z)</option>
+                  </select>
                 </div>
+              </div>
+              
+              {isLoading ? (
+                <div className="text-center py-12">
+                  <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+                  <p className="mt-2">Ürünler yükleniyor...</p>
+                </div>
+              ) : (
+                <>
+                  {sortedProducts.length > 0 ? (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                      {sortedProducts.map((product) => (
+                        <ProductCard
+                          key={product.id}
+                          id={product.id}
+                          name={product.name}
+                          price={product.price}
+                          image={product.image}
+                          category={product.category}
+                          isNew={product.is_new}
+                          isBestseller={product.is_bestseller}
+                          isOnSale={product.is_on_sale}
+                          salePrice={product.sale_price}
+                          isFeatured={product.is_featured}
+                        />
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-12">
+                      <p>Bu kriterlere uygun ürün bulunamadı.</p>
+                    </div>
+                  )}
+                </>
               )}
             </div>
           </div>
         </div>
-        
-        {/* Ürünler Bölümü */}
-        <section className="py-12">
-          <div className="shule-container">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {sortedProducts.map((product) => (
-                <ProductCard 
-                  key={product.id}
-                  id={product.id}
-                  name={product.name}
-                  price={product.price}
-                  image={product.image}
-                  category={product.category}
-                  isNew={product.isNew}
-                  isBestseller={product.isBestseller}
-                />
-              ))}
-            </div>
-            
-            {/* Ürün bulunamadı mesajı */}
-            {sortedProducts.length === 0 && (
-              <div className="text-center py-16">
-                <h3 className="text-xl mb-2">Üzgünüz, bu kriterlere uygun ürün bulunamadı.</h3>
-                <p>Lütfen farklı bir filtre seçin veya tüm ürünleri görüntüleyin.</p>
-              </div>
-            )}
-          </div>
-        </section>
       </main>
       <Footer />
-    </>
+    </div>
   );
 };
 

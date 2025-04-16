@@ -1,42 +1,57 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import { toast } from "sonner";
+
+interface CartItem {
+  id: string | number;
+  name: string;
+  price: number;
+  quantity: number;
+  image: string;
+}
 
 const Cart = () => {
-  const [cart, setCart] = useState([
-    {
-      id: 1,
-      name: "Hasır Büyük Plaj Çantası",
-      price: 499.99,
-      quantity: 1,
-      image: "https://images.unsplash.com/photo-1590739225497-56c33d413340?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80",
-    },
-    {
-      id: 2,
-      name: "Örgü Mini Omuz Çantası",
-      price: 349.99,
-      quantity: 2,
-      image: "https://images.unsplash.com/photo-1590874103328-eac38a683ce7?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80",
-    },
-  ]);
+  const [cart, setCart] = useState<CartItem[]>([]);
 
-  const increaseQuantity = (id: number) => {
+  // Sepeti localStorage'dan yükle
+  useEffect(() => {
+    const savedCart = localStorage.getItem("shuleCart");
+    if (savedCart) {
+      try {
+        setCart(JSON.parse(savedCart));
+      } catch (e) {
+        console.error("Sepet verisi yüklenirken hata oluştu:", e);
+        localStorage.removeItem("shuleCart");
+      }
+    }
+  }, []);
+
+  // Sepet değişikliklerini localStorage'a kaydet
+  useEffect(() => {
+    localStorage.setItem("shuleCart", JSON.stringify(cart));
+  }, [cart]);
+
+  const increaseQuantity = (id: number | string) => {
     setCart(cart.map(item => 
       item.id === id ? { ...item, quantity: item.quantity + 1 } : item
     ));
+    toast.success("Ürün miktarı arttırıldı");
   };
 
-  const decreaseQuantity = (id: number) => {
+  const decreaseQuantity = (id: number | string) => {
     setCart(cart.map(item => 
       item.id === id && item.quantity > 1 ? { ...item, quantity: item.quantity - 1 } : item
     ));
+    toast.success("Ürün miktarı azaltıldı");
   };
 
-  const removeItem = (id: number) => {
+  const removeItem = (id: number | string) => {
     setCart(cart.filter(item => item.id !== id));
+    toast.success("Ürün sepetten kaldırıldı");
   };
 
   const calculateTotal = () => {
@@ -82,7 +97,7 @@ const Cart = () => {
                         onClick={() => removeItem(item.id)}
                         className="text-shule-brown hover:text-shule-darkBrown"
                       >
-                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" className="lucide lucide-x">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-x">
                           <path d="M18 6 6 18" />
                           <path d="m6 6 12 12" />
                         </svg>
@@ -124,7 +139,7 @@ const Cart = () => {
             </div>
           ) : (
             <div className="text-center py-12">
-              <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" className="lucide lucide-shopping-bag mx-auto mb-4 text-gray-400">
+              <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-shopping-bag mx-auto mb-4 text-gray-400">
                 <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z" />
                 <path d="M3 6h18" />
                 <path d="M16 10a4 4 0 0 1-8 0" />
