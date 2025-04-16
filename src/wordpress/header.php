@@ -18,7 +18,7 @@
 <body <?php body_class(); ?>>
 <?php wp_body_open(); ?>
 
-<header class="fixed top-0 left-0 w-full z-50 transition-all duration-300 <?php echo is_front_page() && !is_scrolled() ? 'bg-transparent py-4' : 'bg-white shadow-sm py-2'; ?>">
+<header id="site-header" class="fixed top-0 left-0 w-full z-50 transition-all duration-300 <?php echo is_front_page() && !is_scrolled() ? 'bg-transparent py-4' : 'bg-white shadow-sm py-2'; ?>">
     <div class="shule-container flex items-center justify-between">
         <div class="lg:hidden">
             <button id="menu-toggle" class="p-2">
@@ -67,7 +67,7 @@
             </a>
             <a href="<?php echo esc_url(wc_get_page_permalink('cart')); ?>" class="p-1 relative">
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-shopping-bag"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
-                <?php $cart_count = WC()->cart->get_cart_contents_count(); ?>
+                <?php $cart_count = WC()->cart ? WC()->cart->get_cart_contents_count() : 0; ?>
                 <?php if ($cart_count > 0): ?>
                 <span class="absolute -top-1 -right-1 bg-shule-brown text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">
                     <?php echo esc_html($cart_count); ?>
@@ -79,3 +79,55 @@
     
     <div id="menu-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-30 lg:hidden hidden"></div>
 </header>
+
+<script>
+    // Sayfa yüklendiğinde çalışacak script
+    document.addEventListener('DOMContentLoaded', function() {
+        // Header elementi
+        const header = document.getElementById('site-header');
+        
+        // Scroll olayını dinle
+        window.addEventListener('scroll', function() {
+            // Scroll pozisyonu 50px'den fazla ise
+            if (window.scrollY > 50) {
+                header.classList.remove('bg-transparent');
+                header.classList.add('bg-white', 'shadow-sm', 'py-2');
+                // Cookie'yi set et
+                document.cookie = "scrolled=true; path=/";
+            } else if (<?php echo is_front_page() ? 'true' : 'false'; ?>) {
+                // Ana sayfada ise ve scroll pozisyonu 50px'den az ise
+                header.classList.add('bg-transparent', 'py-4');
+                header.classList.remove('bg-white', 'shadow-sm', 'py-2');
+                // Cookie'yi sıfırla
+                document.cookie = "scrolled=false; path=/";
+            }
+        });
+        
+        // Menü toggle script
+        const menuToggle = document.getElementById('menu-toggle');
+        const menuClose = document.getElementById('menu-close');
+        const primaryMenu = document.getElementById('primary-menu');
+        const menuOverlay = document.getElementById('menu-overlay');
+        
+        if (menuToggle && primaryMenu && menuOverlay) {
+            menuToggle.addEventListener('click', function() {
+                primaryMenu.classList.remove('-translate-x-full');
+                menuOverlay.classList.remove('hidden');
+            });
+        }
+        
+        if (menuClose && primaryMenu && menuOverlay) {
+            menuClose.addEventListener('click', function() {
+                primaryMenu.classList.add('-translate-x-full');
+                menuOverlay.classList.add('hidden');
+            });
+        }
+        
+        if (menuOverlay) {
+            menuOverlay.addEventListener('click', function() {
+                primaryMenu.classList.add('-translate-x-full');
+                menuOverlay.classList.add('hidden');
+            });
+        }
+    });
+</script>

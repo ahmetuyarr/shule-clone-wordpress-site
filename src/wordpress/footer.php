@@ -150,36 +150,5 @@
 
 <?php wp_footer(); ?>
 
-<script>
-    // Menü toggle script
-    document.addEventListener('DOMContentLoaded', function() {
-        const menuToggle = document.getElementById('menu-toggle');
-        const menuClose = document.getElementById('menu-close');
-        const primaryMenu = document.getElementById('primary-menu');
-        const menuOverlay = document.getElementById('menu-overlay');
-        
-        if (menuToggle && primaryMenu && menuOverlay) {
-            menuToggle.addEventListener('click', function() {
-                primaryMenu.classList.remove('-translate-x-full');
-                menuOverlay.classList.remove('hidden');
-            });
-        }
-        
-        if (menuClose && primaryMenu && menuOverlay) {
-            menuClose.addEventListener('click', function() {
-                primaryMenu.classList.add('-translate-x-full');
-                menuOverlay.classList.add('hidden');
-            });
-        }
-        
-        if (menuOverlay) {
-            menuOverlay.addEventListener('click', function() {
-                primaryMenu.classList.add('-translate-x-full');
-                menuOverlay.classList.add('hidden');
-            });
-        }
-    });
-</script>
-
 </body>
 </html>
