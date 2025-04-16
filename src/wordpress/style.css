@@ -1,0 +1,283 @@
+
+/*
+Theme Name: Shule Bags
+Theme URI: https://shulebags.com
+Author: ShuleBags
+Author URI: https://shulebags.com
+Description: El yapımı hasır ve örgü çantalar için WordPress teması
+Version: 1.0
+Requires PHP: 7.4
+License: GNU General Public License v2 or later
+License URI: LICENSE
+Text Domain: shulebags
+*/
+
+/* Tailwind CSS */
+@import "tailwind.css";
+
+/* Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap');
+
+/* Base Styles */
+:root {
+  --shule-beige: #F5F5DC;
+  --shule-light-beige: #E8E4C9;
+  --shule-brown: #A67B5B;
+  --shule-dark-brown: #8B7355;
+  --shule-light-grey: #F8F8F8;
+  --shule-grey: #EEEEEE;
+  --shule-dark-text: #333333;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: 'Montserrat', sans-serif;
+  color: var(--shule-dark-text);
+  line-height: 1.6;
+  background-color: #fff;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Playfair Display', serif;
+  font-weight: 500;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+  transition: color 0.3s;
+}
+
+a:hover {
+  color: var(--shule-brown);
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Container */
+.shule-container {
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+@media (min-width: 768px) {
+  .shule-container {
+    padding-left: 2rem;
+    padding-right: 2rem;
+  }
+}
+
+/* Typography */
+.shule-heading {
+  font-family: 'Playfair Display', serif;
+  font-size: 2rem;
+  font-weight: 500;
+  color: var(--shule-dark-text);
+}
+
+@media (min-width: 768px) {
+  .shule-heading {
+    font-size: 2.5rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .shule-heading {
+    font-size: 3rem;
+  }
+}
+
+.shule-subheading {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.5rem;
+  font-weight: 500;
+  color: var(--shule-dark-text);
+}
+
+@media (min-width: 768px) {
+  .shule-subheading {
+    font-size: 1.75rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .shule-subheading {
+    font-size: 2rem;
+  }
+}
+
+.shule-paragraph {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 1rem;
+  color: var(--shule-dark-text);
+  line-height: 1.7;
+}
+
+/* Buttons */
+.shule-button {
+  background-color: var(--shule-brown);
+  color: #fff;
+  padding: 0.75rem 1.5rem;
+  transition: all 0.3s;
+  text-transform: uppercase;
+  font-size: 0.875rem;
+  letter-spacing: 0.05em;
+  font-family: 'Montserrat', sans-serif;
+  display: inline-block;
+  border: none;
+  cursor: pointer;
+}
+
+.shule-button:hover {
+  background-color: var(--shule-dark-brown);
+  color: #fff;
+}
+
+/* Links */
+.shule-link {
+  color: var(--shule-dark-text);
+  transition: color 0.3s;
+}
+
+.shule-link:hover {
+  color: var(--shule-brown);
+}
+
+/* Cards */
+.shule-card {
+  background-color: #fff;
+  overflow: hidden;
+  transition: all 0.3s;
+}
+
+.shule-card:hover {
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+/* Product Images */
+.shule-product-image {
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+  transition: transform 0.3s;
+}
+
+.shule-product-image:hover {
+  transform: scale(1.05);
+}
+
+/* Form Inputs */
+.shule-input {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid var(--shule-grey);
+  transition: all 0.3s;
+}
+
+.shule-input:focus {
+  border-color: var(--shule-brown);
+  outline: none;
+}
+
+/* WooCommerce Overrides */
+.woocommerce #respond input#submit, 
+.woocommerce a.button, 
+.woocommerce button.button, 
+.woocommerce input.button {
+  background-color: var(--shule-brown);
+  color: #fff;
+  border-radius: 0;
+  font-weight: 500;
+  padding: 0.75rem 1.5rem;
+  text-transform: uppercase;
+  font-size: 0.875rem;
+  letter-spacing: 0.05em;
+  transition: all 0.3s;
+}
+
+.woocommerce #respond input#submit:hover, 
+.woocommerce a.button:hover, 
+.woocommerce button.button:hover, 
+.woocommerce input.button:hover {
+  background-color: var(--shule-dark-brown);
+  color: #fff;
+}
+
+.woocommerce span.onsale {
+  background-color: var(--shule-brown);
+  border-radius: 0;
+  min-width: auto;
+  min-height: auto;
+  line-height: 1.5;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 500;
+}
+
+.woocommerce div.product .woocommerce-tabs ul.tabs {
+  padding: 0;
+  margin-bottom: 2rem;
+}
+
+.woocommerce div.product .woocommerce-tabs ul.tabs::before {
+  border-color: var(--shule-grey);
+}
+
+.woocommerce div.product .woocommerce-tabs ul.tabs li {
+  background-color: transparent;
+  border-radius: 0;
+  border: none;
+  padding: 0;
+  margin: 0;
+}
+
+.woocommerce div.product .woocommerce-tabs ul.tabs li a {
+  padding: 0.75rem 1.5rem;
+  font-weight: 500;
+  color: var(--shule-dark-text);
+}
+
+.woocommerce div.product .woocommerce-tabs ul.tabs li.active {
+  background-color: transparent;
+  border-bottom: 2px solid var(--shule-brown);
+}
+
+.woocommerce div.product .woocommerce-tabs ul.tabs li.active a {
+  color: var(--shule-brown);
+}
+
+.woocommerce-product-gallery {
+  opacity: 1 !important;
+}
+
+.woocommerce-product-gallery__wrapper {
+  margin: 0;
+}
+
+/* Admin Bar Fix */
+.admin-bar header.fixed {
+  top: 32px;
+}
+
+@media screen and (max-width: 782px) {
+  .admin-bar header.fixed {
+    top: 46px;
+  }
+}
