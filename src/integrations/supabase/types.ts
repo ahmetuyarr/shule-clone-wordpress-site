@@ -9,7 +9,227 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      categories: {
+        Row: {
+          created_at: string | null
+          id: string
+          name: string
+          slug: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          name: string
+          slug: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          name?: string
+          slug?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      collection_products: {
+        Row: {
+          collection_id: string
+          created_at: string | null
+          id: string
+          product_id: string
+        }
+        Insert: {
+          collection_id: string
+          created_at?: string | null
+          id?: string
+          product_id: string
+        }
+        Update: {
+          collection_id?: string
+          created_at?: string | null
+          id?: string
+          product_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "collection_products_collection_id_fkey"
+            columns: ["collection_id"]
+            isOneToOne: false
+            referencedRelation: "collections"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "collection_products_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      collections: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          id: string
+          image: string | null
+          name: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          image?: string | null
+          name: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          image?: string | null
+          name?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      menu_items: {
+        Row: {
+          created_at: string | null
+          id: string
+          is_active: boolean | null
+          link: string
+          name: string
+          parent_id: string | null
+          position: number
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          link: string
+          name: string
+          parent_id?: string | null
+          position?: number
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          link?: string
+          name?: string
+          parent_id?: string | null
+          position?: number
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "menu_items_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "menu_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      page_contents: {
+        Row: {
+          content: Json
+          created_at: string | null
+          id: string
+          page_key: string
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          content?: Json
+          created_at?: string | null
+          id?: string
+          page_key: string
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          content?: Json
+          created_at?: string | null
+          id?: string
+          page_key?: string
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      products: {
+        Row: {
+          category: string
+          created_at: string | null
+          description: string | null
+          id: string
+          image: string
+          is_bestseller: boolean | null
+          is_featured: boolean | null
+          is_new: boolean | null
+          is_on_sale: boolean | null
+          name: string
+          price: number
+          sale_price: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          category: string
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          image: string
+          is_bestseller?: boolean | null
+          is_featured?: boolean | null
+          is_new?: boolean | null
+          is_on_sale?: boolean | null
+          name: string
+          price: number
+          sale_price?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          category?: string
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          image?: string
+          is_bestseller?: boolean | null
+          is_featured?: boolean | null
+          is_new?: boolean | null
+          is_on_sale?: boolean | null
+          name?: string
+          price?: number
+          sale_price?: number | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      settings: {
+        Row: {
+          id: string
+          updated_at: string | null
+          value: Json
+        }
+        Insert: {
+          id: string
+          updated_at?: string | null
+          value: Json
+        }
+        Update: {
+          id?: string
+          updated_at?: string | null
+          value?: Json
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
