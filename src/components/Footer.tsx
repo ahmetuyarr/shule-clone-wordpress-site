@@ -1,15 +1,12 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Instagram, Facebook, Twitter } from 'lucide-react';
-
 const Footer: React.FC = () => {
-  return (
-    <footer className="bg-shule-beige pt-16 pb-8">
+  return <footer className="bg-shule-beige pt-16 pb-8">
       <div className="shule-container">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
           <div>
-            <h3 className="font-playfair text-xl mb-4">SHULE</h3>
+            <h3 className="font-playfair text-xl mb-4">ÖZEL ÇANTA</h3>
             <p className="shule-paragraph mb-4">
               Yerel zanaatkârlar tarafından el yapımı üretilen hasır ve örgü çantalar.
               Doğal malzemeler, özgün tasarımlar.
@@ -81,21 +78,13 @@ const Footer: React.FC = () => {
           
           <div>
             <h3 className="uppercase font-montserrat text-sm font-semibold mb-4">İletişim</h3>
-            <p className="text-sm mb-2">info@shulebags.com</p>
+            <p className="text-sm mb-2">info@ozelcanta.com</p>
             <p className="text-sm mb-4">+90 (212) 555 1234</p>
             <h4 className="uppercase font-montserrat text-sm font-semibold mb-2">Bülten</h4>
             <p className="text-sm mb-2">Yeni ürünler ve kampanyalar için kaydolun.</p>
             <form className="flex mt-2">
-              <input 
-                type="email" 
-                placeholder="E-posta adresiniz" 
-                className="shule-input text-sm py-2 px-3"
-                required
-              />
-              <button 
-                type="submit" 
-                className="bg-shule-brown hover:bg-shule-darkBrown text-white py-2 px-4 text-sm uppercase tracking-wider"
-              >
+              <input type="email" placeholder="E-posta adresiniz" className="shule-input text-sm py-2 px-3" required />
+              <button type="submit" className="bg-shule-brown hover:bg-shule-darkBrown text-white py-2 px-4 text-sm uppercase tracking-wider">
                 Gönder
               </button>
             </form>
@@ -116,8 +105,6 @@ const Footer: React.FC = () => {
           </div>
         </div>
       </div>
-    </footer>
-  );
+    </footer>;
 };
-
 export default Footer;
