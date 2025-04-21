@@ -8,6 +8,14 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
+import { 
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue 
+} from "@/components/ui/select";
+import { X, Plus } from "lucide-react";
 
 interface Product {
   id: string;
@@ -16,11 +24,25 @@ interface Product {
   sale_price?: number;
   description?: string;
   image: string;
+  images?: string[];
   category: string;
+  collection?: string;
+  category_id?: string;
+  collection_id?: string;
   is_new: boolean;
   is_bestseller: boolean;
   is_on_sale: boolean;
   is_featured: boolean;
+}
+
+interface Category {
+  id: string;
+  name: string;
+}
+
+interface Collection {
+  id: string;
+  name: string;
 }
 
 interface ProductFormProps {
@@ -37,14 +59,22 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, isOpen, onClose }) =
     sale_price: undefined,
     description: "",
     image: "",
+    images: [],
     category: "",
+    collection: "",
+    category_id: undefined,
+    collection_id: undefined,
     is_new: false,
     is_bestseller: false,
     is_on_sale: false,
     is_featured: false
   });
+
   const [loading, setLoading] = useState(false);
   const [categories, setCategories] = useState<string[]>([]);
+  const [categoryOptions, setCategoryOptions] = useState<Category[]>([]);
+  const [collectionOptions, setCollectionOptions] = useState<Collection[]>([]);
+  const [imageUrls, setImageUrls] = useState<string[]>([]);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -55,15 +85,27 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, isOpen, onClose }) =
         sale_price: product.sale_price,
         description: product.description || "",
         image: product.image,
+        images: product.images || [],
         category: product.category,
+        collection: product.collection || "",
+        category_id: product.category_id || undefined,
+        collection_id: product.collection_id || undefined,
         is_new: product.is_new,
         is_bestseller: product.is_bestseller,
         is_on_sale: product.is_on_sale,
         is_featured: product.is_featured
       });
+      
+      if (product.images && product.images.length > 0) {
+        setImageUrls(product.images);
+      } else if (product.image) {
+        setImageUrls([product.image]);
+      }
     }
     
     fetchCategories();
+    fetchCategoryOptions();
+    fetchCollectionOptions();
   }, [product]);
 
   const fetchCategories = async () => {
@@ -80,6 +122,34 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, isOpen, onClose }) =
       setCategories(uniqueCategories);
     } catch (error) {
       console.error("Kategoriler yüklenirken hata oluştu:", error);
+    }
+  };
+  
+  const fetchCategoryOptions = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("categories")
+        .select("*")
+        .order("name");
+
+      if (error) throw error;
+      setCategoryOptions(data || []);
+    } catch (error) {
+      console.error("Kategori seçenekleri yüklenirken hata oluştu:", error);
+    }
+  };
+
+  const fetchCollectionOptions = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("collections")
+        .select("*")
+        .order("name");
+
+      if (error) throw error;
+      setCollectionOptions(data || []);
+    } catch (error) {
+      console.error("Koleksiyon seçenekleri yüklenirken hata oluştu:", error);
     }
   };
 
@@ -99,6 +169,23 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, isOpen, onClose }) =
     }
   };
 
+  const handleSelectChange = (name: string, value: string) => {
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+
+    if (name === 'category_id' && value) {
+      const selectedCategory = categoryOptions.find(cat => cat.id === value);
+      if (selectedCategory) {
+        setFormData(prev => ({
+          ...prev,
+          category: selectedCategory.name
+        }));
+      }
+    }
+  };
+
   const handleCheckboxChange = (name: string, checked: boolean) => {
     setFormData(prev => ({
       ...prev,
@@ -112,6 +199,37 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, isOpen, onClose }) =
         sale_price: undefined
       }));
     }
+  };
+
+  const addImageUrl = () => {
+    if (!formData.image.trim()) return;
+    
+    if (!imageUrls.includes(formData.image)) {
+      const newImageUrls = [...imageUrls, formData.image];
+      setImageUrls(newImageUrls);
+      setFormData(prev => ({
+        ...prev,
+        images: newImageUrls,
+        image: newImageUrls[0]
+      }));
+    }
+    
+    // Image ekledikten sonra input'u temizle
+    setFormData(prev => ({
+      ...prev,
+      image: ""
+    }));
+  };
+
+  const removeImageUrl = (urlToRemove: string) => {
+    const newImageUrls = imageUrls.filter(url => url !== urlToRemove);
+    setImageUrls(newImageUrls);
+    
+    setFormData(prev => ({
+      ...prev,
+      images: newImageUrls,
+      image: newImageUrls.length > 0 ? newImageUrls[0] : ""
+    }));
   };
 
   const validateForm = () => {
@@ -142,11 +260,11 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, isOpen, onClose }) =
       return false;
     }
 
-    if (!formData.image || formData.image.trim() === "") {
+    if (imageUrls.length === 0) {
       toast({
         variant: "destructive",
         title: "Hata",
-        description: "Ürün görseli URL'si zorunludur."
+        description: "En az bir ürün görseli URL'si zorunludur."
       });
       return false;
     }
@@ -171,11 +289,18 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, isOpen, onClose }) =
     setLoading(true);
 
     try {
+      // Resimlerle güncellenen formData
+      const updatedFormData = {
+        ...formData,
+        image: imageUrls[0], // İlk resmi ana resim olarak ayarla
+        images: imageUrls
+      };
+      
       if (isEditing && product) {
         // Güncelleme işlemi
         const { error } = await supabase
           .from("products")
-          .update(formData)
+          .update(updatedFormData)
           .eq("id", product.id);
 
         if (error) throw error;
@@ -188,7 +313,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, isOpen, onClose }) =
         // Yeni ürün ekleme işlemi
         const { error } = await supabase
           .from("products")
-          .insert([formData]);
+          .insert([updatedFormData]);
 
         if (error) throw error;
 
@@ -213,7 +338,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, isOpen, onClose }) =
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>
             {isEditing ? "Ürün Düzenle" : "Yeni Ürün Ekle"}
@@ -235,23 +360,60 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, isOpen, onClose }) =
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="category">Kategori</Label>
-              <div className="flex gap-2">
-                <Input
-                  id="category"
-                  name="category"
-                  value={formData.category}
-                  onChange={handleChange}
-                  placeholder="Kategori adını giriniz"
-                  list="categoryOptions"
-                  required
-                />
-                <datalist id="categoryOptions">
-                  {categories.map((cat, index) => (
-                    <option key={index} value={cat} />
+              <Label htmlFor="category_id">Kategori</Label>
+              <Select 
+                value={formData.category_id} 
+                onValueChange={(value) => handleSelectChange('category_id', value)}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Kategori seçiniz" />
+                </SelectTrigger>
+                <SelectContent>
+                  {categoryOptions.map((category) => (
+                    <SelectItem key={category.id} value={category.id}>
+                      {category.name}
+                    </SelectItem>
                   ))}
-                </datalist>
-              </div>
+                </SelectContent>
+              </Select>
+              {!formData.category_id && (
+                <div className="mt-2">
+                  <Label htmlFor="category">Veya yeni kategori gir</Label>
+                  <Input
+                    id="category"
+                    name="category"
+                    value={formData.category}
+                    onChange={handleChange}
+                    placeholder="Kategori adını giriniz"
+                    list="categoryOptions"
+                  />
+                  <datalist id="categoryOptions">
+                    {categories.map((cat, index) => (
+                      <option key={index} value={cat} />
+                    ))}
+                  </datalist>
+                </div>
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="collection_id">Koleksiyon</Label>
+              <Select 
+                value={formData.collection_id || ''} 
+                onValueChange={(value) => handleSelectChange('collection_id', value)}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Koleksiyon seçiniz (opsiyonel)" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">Koleksiyon yok</SelectItem>
+                  {collectionOptions.map((collection) => (
+                    <SelectItem key={collection.id} value={collection.id}>
+                      {collection.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
             <div className="space-y-2">
@@ -286,21 +448,51 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, isOpen, onClose }) =
 
             <div className="space-y-2 col-span-2">
               <Label htmlFor="image">Görsel URL</Label>
-              <Input
-                id="image"
-                name="image"
-                value={formData.image}
-                onChange={handleChange}
-                placeholder="https://example.com/image.jpg"
-                required
-              />
-              {formData.image && (
-                <div className="mt-2">
-                  <img
-                    src={formData.image}
-                    alt="Ürün Önizleme"
-                    className="max-h-40 rounded border object-contain"
-                  />
+              <div className="flex gap-2">
+                <Input
+                  id="image"
+                  name="image"
+                  value={formData.image}
+                  onChange={handleChange}
+                  placeholder="https://example.com/image.jpg"
+                />
+                <Button 
+                  type="button" 
+                  variant="secondary" 
+                  onClick={addImageUrl}
+                  className="flex items-center gap-1"
+                >
+                  <Plus size={16} /> Ekle
+                </Button>
+              </div>
+
+              {/* Görsel Önizleme */}
+              {imageUrls.length > 0 && (
+                <div className="mt-4">
+                  <Label>Görsel Galerisi</Label>
+                  <div className="grid grid-cols-3 gap-3 mt-2">
+                    {imageUrls.map((url, index) => (
+                      <div key={index} className="relative group border rounded p-1">
+                        <img
+                          src={url}
+                          alt={`Ürün Görseli ${index + 1}`}
+                          className="w-full aspect-square object-cover rounded"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => removeImageUrl(url)}
+                          className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                        >
+                          <X size={14} />
+                        </button>
+                        {index === 0 && (
+                          <div className="absolute bottom-1 left-1 right-1 text-center bg-black bg-opacity-50 text-white text-xs py-0.5 px-1 rounded">
+                            Ana Görsel
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
                 </div>
               )}
             </div>

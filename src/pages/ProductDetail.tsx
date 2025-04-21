@@ -7,6 +7,8 @@ import { Button } from "@/components/ui/button";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { toast } from "sonner";
+import { Heart, ShoppingBag } from "lucide-react";
+import ProductImageCarousel from "@/components/ProductImageCarousel";
 
 interface CartItem {
   id: string | number;
@@ -19,6 +21,10 @@ interface CartItem {
 const ProductDetail = () => {
   const { id } = useParams<{ id: string }>();
   const [quantity, setQuantity] = useState(1);
+  const [user, setUser] = useState<any>(null);
+  const [isFavorite, setIsFavorite] = useState(false);
+  const [favoriteId, setFavoriteId] = useState<string | null>(null);
+  const [isAddingToFavorites, setIsAddingToFavorites] = useState(false);
   
   // Ürün detaylarını Supabase'den çek
   const { data: product, isLoading, error } = useQuery({
@@ -38,6 +44,45 @@ const ProductDetail = () => {
       return data;
     }
   });
+
+  useEffect(() => {
+    const getUserAndCheckFavorite = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      setUser(user);
+      
+      if (user && id) {
+        checkIfFavorite(user.id, id);
+      }
+    };
+    
+    getUserAndCheckFavorite();
+  }, [id]);
+  
+  const checkIfFavorite = async (userId: string, productId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('favorites')
+        .select('id')
+        .eq('user_id', userId)
+        .eq('product_id', productId)
+        .single() as { data: { id: string } | null; error: unknown };
+      
+      if (error) {
+        console.error("Favori kontrolü sırasında hata:", error);
+        return;
+      }
+      
+      if (data) {
+        setIsFavorite(true);
+        setFavoriteId(data.id);
+      } else {
+        setIsFavorite(false);
+        setFavoriteId(null);
+      }
+    } catch (error) {
+      console.error("Favori kontrolü sırasında hata:", error);
+    }
+  };
 
   // Sepete ürün ekleme
   const addToCart = () => {
@@ -76,6 +121,70 @@ const ProductDetail = () => {
     localStorage.setItem("shuleCart", JSON.stringify(currentCart));
     
     toast.success("Ürün sepete eklendi");
+  };
+
+  // Favorilere ekleme/çıkarma
+  const toggleFavorite = async () => {
+    if (!user) {
+      toast.error("Favorilere eklemek için giriş yapmalısınız");
+      return;
+    }
+    
+    if (!product) return;
+    
+    setIsAddingToFavorites(true);
+    
+    try {
+      if (isFavorite && favoriteId) {
+        // Favorilerden çıkar
+        const { error } = await supabase
+          .from('favorites')
+          .delete()
+          .eq('id', favoriteId) as { error: unknown };
+          
+        if (error) throw error;
+        
+        setIsFavorite(false);
+        setFavoriteId(null);
+        toast.success("Ürün favorilerden çıkarıldı");
+      } else {
+        // Favorilere ekle
+        const { data, error } = await supabase
+          .from('favorites')
+          .insert([{
+            user_id: user.id,
+            product_id: product.id
+          }])
+          .select('id')
+          .single() as { data: { id: string } | null; error: unknown };
+          
+        if (error) throw error;
+        
+        if (data) {
+          setIsFavorite(true);
+          setFavoriteId(data.id);
+          toast.success("Ürün favorilere eklendi");
+        }
+      }
+    } catch (error) {
+      console.error("Favori işlemi sırasında hata:", error);
+      toast.error("Bir hata oluştu");
+    } finally {
+      setIsAddingToFavorites(false);
+    }
+  };
+
+  // Ürün resimlerini hazırla
+  const getProductImages = () => {
+    if (!product) return [];
+    
+    // images dizisi varsa ve içinde öğe varsa onu kullan
+    if (product.images && product.images.length > 0) {
+      return product.images;
+    }
+    
+    // Yoksa, ana resmi tek öğeli dizi olarak döndür
+    return [product.image];
   };
 
   if (isLoading) {
@@ -137,15 +246,12 @@ const ProductDetail = () => {
 
         <div className="shule-container py-12">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-            {/* Ürün Görseli */}
+            {/* Ürün Görsel Carousel */}
             <div>
-              <div className="mb-4 aspect-square overflow-hidden">
-                <img 
-                  src={product.image} 
-                  alt={product.name}
-                  className="w-full h-full object-cover"
-                />
-              </div>
+              <ProductImageCarousel 
+                images={getProductImages()}
+                productName={product.name}
+              />
             </div>
             
             {/* Ürün Bilgileri */}
@@ -174,6 +280,14 @@ const ProductDetail = () => {
                 <div className="font-medium mb-2">Kategori:</div>
                 <p>{product.category}</p>
               </div>
+              
+              {/* Koleksiyon */}
+              {product.collection && (
+                <div className="mb-6">
+                  <div className="font-medium mb-2">Koleksiyon:</div>
+                  <p>{product.collection}</p>
+                </div>
+              )}
 
               {/* Adet Seçimi */}
               <div className="mb-6">
@@ -195,13 +309,25 @@ const ProductDetail = () => {
                 </div>
               </div>
               
-              {/* Sepete Ekle Butonu */}
-              <Button 
-                onClick={addToCart}
-                className="w-full bg-shule-brown hover:bg-shule-darkBrown text-white py-3 mb-6"
-              >
-                Sepete Ekle
-              </Button>
+              {/* Butonlar */}
+              <div className="flex flex-col sm:flex-row gap-3 mb-6">
+                <Button 
+                  onClick={addToCart}
+                  className="flex-1 bg-shule-brown hover:bg-shule-darkBrown text-white py-3 flex items-center justify-center gap-2"
+                >
+                  <ShoppingBag size={18} />
+                  Sepete Ekle
+                </Button>
+                <Button
+                  onClick={toggleFavorite}
+                  variant={isFavorite ? "destructive" : "outline"}
+                  className="py-3 flex items-center justify-center gap-2"
+                  disabled={isAddingToFavorites}
+                >
+                  <Heart size={18} fill={isFavorite ? "currentColor" : "none"} />
+                  {isFavorite ? "Favorilerden Çıkar" : "Favorilere Ekle"}
+                </Button>
+              </div>
               
               {/* Etiketler */}
               {(product.is_new || product.is_bestseller || product.is_featured) && (
