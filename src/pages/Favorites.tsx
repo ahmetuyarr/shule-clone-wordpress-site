@@ -47,7 +47,7 @@ const Favorites = () => {
     setLoading(true);
     try {
       const { data, error } = await supabase
-        .from("favorites" as any)
+        .from("favorites")
         .select(`
           *,
           product: products (*)
@@ -55,7 +55,7 @@ const Favorites = () => {
         .eq("user_id", userId);
 
       if (error) throw error;
-      if (data) setFavorites(data);
+      if (data) setFavorites(data as unknown as FavoriteItem[]);
     } catch (error) {
       console.error("Error fetching favorites:", error);
       toast.error("Favoriler yüklenirken bir hata oluştu");
@@ -67,7 +67,7 @@ const Favorites = () => {
   const removeFavorite = async (favoriteId: string) => {
     try {
       const { error } = await supabase
-        .from("favorites" as any)
+        .from("favorites")
         .delete()
         .eq("id", favoriteId);
       

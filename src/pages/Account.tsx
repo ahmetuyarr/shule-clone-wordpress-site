@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Link, useNavigate } from "react-router-dom";
@@ -118,7 +117,7 @@ const Account = () => {
         .order("created_at", { ascending: false });
 
       if (error) throw error;
-      if (data) setOrders(data);
+      if (data) setOrders(data as unknown as Order[]);
     } catch (error) {
       console.error("Error fetching orders:", error);
     }
@@ -126,10 +125,8 @@ const Account = () => {
 
   const fetchFavorites = async (userId: string) => {
     try {
-      // Burada tip hatası var çünkü supabase tiplerinde "favorites" tablosu tanımlı değil
-      // Geçici çözüm olarak any tipini kullanıyoruz
       const { data, error } = await supabase
-        .from("favorites" as any)
+        .from("favorites")
         .select(`
           *,
           product: products (*)
@@ -137,7 +134,7 @@ const Account = () => {
         .eq("user_id", userId);
 
       if (error) throw error;
-      if (data) setFavorites(data);
+      if (data) setFavorites(data as unknown as FavoriteItem[]);
     } catch (error) {
       console.error("Error fetching favorites:", error);
     }
@@ -363,7 +360,7 @@ const Account = () => {
                                 onClick={async () => {
                                   try {
                                     await supabase
-                                      .from("favorites" as any)
+                                      .from("favorites")
                                       .delete()
                                       .eq("id", favorite.id);
                                     
