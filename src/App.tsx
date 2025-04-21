@@ -14,6 +14,9 @@ import CollectionDetail from "./pages/CollectionDetail";
 import Contact from "./pages/Contact";
 import About from "./pages/About";
 import Admin from "./pages/Admin";
+import Auth from "./pages/Auth";
+import Account from "./pages/Account";
+import Favorites from "./pages/Favorites";
 
 const queryClient = new QueryClient();
 
@@ -35,6 +38,7 @@ const App = () => (
           <Route path="/admin" element={<Admin />} />
           <Route path="/auth" element={<Auth />} />
           <Route path="/account" element={<Account />} />
+          <Route path="/favorites" element={<Favorites />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

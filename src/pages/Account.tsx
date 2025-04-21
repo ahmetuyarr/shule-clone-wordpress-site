@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { useParams, Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
@@ -11,7 +11,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import { useNavigate } from "react-router-dom";
 
 interface ProfileData {
   first_name: string;
@@ -22,6 +21,38 @@ interface ProfileData {
   address_city: string;
   address_postal_code: string;
   address_country: string;
+}
+
+interface FavoriteItem {
+  id: string;
+  user_id: string;
+  product_id: string;
+  created_at: string;
+  product: {
+    id: string;
+    name: string;
+    price: number;
+    image: string;
+  };
+}
+
+interface OrderItem {
+  id: string;
+  product: {
+    id: string;
+    name: string;
+    image: string;
+  };
+  quantity: number;
+  price_at_purchase: number;
+}
+
+interface Order {
+  id: string;
+  created_at: string;
+  status: string;
+  total_amount: number;
+  order_items: OrderItem[];
 }
 
 const Account = () => {
@@ -37,8 +68,8 @@ const Account = () => {
     address_postal_code: "",
     address_country: ""
   });
-  const [orders, setOrders] = useState([]);
-  const [favorites, setFavorites] = useState([]);
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [favorites, setFavorites] = useState<FavoriteItem[]>([]);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -55,7 +86,7 @@ const Account = () => {
     };
 
     getUser();
-  }, []);
+  }, [navigate]);
 
   const fetchProfile = async (userId: string) => {
     try {
@@ -95,8 +126,10 @@ const Account = () => {
 
   const fetchFavorites = async (userId: string) => {
     try {
+      // Burada tip hatası var çünkü supabase tiplerinde "favorites" tablosu tanımlı değil
+      // Geçici çözüm olarak any tipini kullanıyoruz
       const { data, error } = await supabase
-        .from("favorites")
+        .from("favorites" as any)
         .select(`
           *,
           product: products (*)
@@ -255,7 +288,7 @@ const Account = () => {
                 <CardContent>
                   {orders.length > 0 ? (
                     <div className="space-y-4">
-                      {orders.map((order: any) => (
+                      {orders.map((order: Order) => (
                         <div key={order.id} className="border rounded-lg p-4">
                           <div className="flex justify-between items-center mb-2">
                             <div>
@@ -272,7 +305,7 @@ const Account = () => {
                             </div>
                           </div>
                           <div className="space-y-2">
-                            {order.order_items.map((item: any) => (
+                            {order.order_items.map((item: OrderItem) => (
                               <div key={item.id} className="flex items-center gap-4">
                                 <img
                                   src={item.product.image}
@@ -306,7 +339,7 @@ const Account = () => {
                 <CardContent>
                   {favorites.length > 0 ? (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                      {favorites.map((favorite: any) => (
+                      {favorites.map((favorite: FavoriteItem) => (
                         <div key={favorite.id} className="border rounded-lg overflow-hidden">
                           <img
                             src={favorite.product.image}
@@ -330,7 +363,7 @@ const Account = () => {
                                 onClick={async () => {
                                   try {
                                     await supabase
-                                      .from("favorites")
+                                      .from("favorites" as any)
                                       .delete()
                                       .eq("id", favorite.id);
                                     
