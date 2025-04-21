@@ -46,13 +46,19 @@ const Favorites = () => {
   const fetchFavorites = async (userId: string) => {
     setLoading(true);
     try {
+      // Type assertion to handle the 'favorites' table
+      type FavoriteQuery = {
+        data: FavoriteItem[] | null;
+        error: unknown;
+      };
+
       const { data, error } = await supabase
         .from('favorites')
         .select(`
           *,
           product:products(*)
         `)
-        .eq('user_id', userId) as { data: FavoriteItem[] | null; error: unknown };
+        .eq('user_id', userId) as FavoriteQuery;
 
       if (error) throw error;
       if (data) setFavorites(data);
@@ -66,10 +72,14 @@ const Favorites = () => {
 
   const removeFavorite = async (favoriteId: string) => {
     try {
+      type DeleteResult = {
+        error: unknown;
+      };
+      
       const { error } = await supabase
         .from('favorites')
         .delete()
-        .eq('id', favoriteId) as { error: unknown };
+        .eq('id', favoriteId) as DeleteResult;
       
       if (error) throw error;
       

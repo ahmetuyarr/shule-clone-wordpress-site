@@ -125,13 +125,18 @@ const Account = () => {
 
   const fetchFavorites = async (userId: string) => {
     try {
+      type FavoriteQuery = {
+        data: FavoriteItem[] | null;
+        error: unknown;
+      };
+      
       const { data, error } = await supabase
         .from('favorites')
         .select(`
           *,
           product:products(*)
         `)
-        .eq('user_id', userId) as { data: FavoriteItem[] | null; error: unknown };
+        .eq('user_id', userId) as FavoriteQuery;
 
       if (error) throw error;
       if (data) setFavorites(data);
@@ -359,10 +364,16 @@ const Account = () => {
                                 className="flex-1"
                                 onClick={async () => {
                                   try {
-                                    await supabase
+                                    type DeleteResult = {
+                                      error: unknown;
+                                    };
+                                    
+                                    const { error } = await supabase
                                       .from('favorites')
                                       .delete()
-                                      .eq('id', favorite.id) as { error: unknown };
+                                      .eq('id', favorite.id) as DeleteResult;
+                                    
+                                    if (error) throw error;
                                     
                                     fetchFavorites(user?.id as string);
                                     toast.success("Ürün favorilerden kaldırıldı");

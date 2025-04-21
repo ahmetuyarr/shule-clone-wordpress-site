@@ -33,7 +33,7 @@ const ProductImageCarousel = ({ images, productName }: ProductImageCarouselProps
     <div className="space-y-4">
       <Carousel 
         className="w-full"
-        onSelect={(selectedIndex) => setCurrentIndex(selectedIndex)}
+        onSelect={(index: number) => setCurrentIndex(index)}
       >
         <CarouselContent>
           {images.map((image, index) => (
