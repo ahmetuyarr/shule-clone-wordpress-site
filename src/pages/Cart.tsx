@@ -126,8 +126,8 @@ const Cart = () => {
                   </div>
                 </div>
                 
-                <Button className="w-full bg-shule-brown hover:bg-shule-darkBrown text-white">
-                  Ödemeye Geç
+                <Button asChild className="w-full bg-shule-brown hover:bg-shule-darkBrown text-white">
+                  <Link to="/checkout">Ödemeye Geç</Link>
                 </Button>
                 
                 <div className="mt-6 text-center">

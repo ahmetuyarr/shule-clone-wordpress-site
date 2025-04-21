@@ -8,6 +8,7 @@ import CategoriesAdmin from "@/components/admin/CategoriesAdmin";
 import CollectionsAdmin from "@/components/admin/CollectionsAdmin";
 import MenuAdmin from "@/components/admin/MenuAdmin";
 import SettingsAdmin from "@/components/admin/SettingsAdmin";
+import OrdersAdmin from "@/components/admin/OrdersAdmin";
 import { Toaster } from "@/components/ui/toaster";
 
 const Admin = () => {
@@ -21,10 +22,11 @@ const Admin = () => {
           <h1 className="text-3xl font-semibold text-center mb-8">Yönetim Paneli</h1>
           
           <Tabs defaultValue="products" value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid grid-cols-5 mb-8">
+            <TabsList className="grid grid-cols-6 mb-8">
               <TabsTrigger value="products">Ürünler</TabsTrigger>
               <TabsTrigger value="categories">Kategoriler</TabsTrigger>
               <TabsTrigger value="collections">Koleksiyonlar</TabsTrigger>
+              <TabsTrigger value="orders">Siparişler</TabsTrigger>
               <TabsTrigger value="menu">Menüler</TabsTrigger>
               <TabsTrigger value="settings">Ayarlar</TabsTrigger>
             </TabsList>
@@ -39,6 +41,10 @@ const Admin = () => {
             
             <TabsContent value="collections">
               <CollectionsAdmin />
+            </TabsContent>
+            
+            <TabsContent value="orders">
+              <OrdersAdmin />
             </TabsContent>
             
             <TabsContent value="menu">
