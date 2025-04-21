@@ -33,7 +33,14 @@ const ProductImageCarousel = ({ images, productName }: ProductImageCarouselProps
     <div className="space-y-4">
       <Carousel 
         className="w-full"
-        onSelect={(index: number) => setCurrentIndex(index)}
+        opts={{
+          startIndex: currentIndex,
+          onChange: (api) => {
+            if (api) {
+              setCurrentIndex(api.selectedScrollSnap());
+            }
+          }
+        }}
       >
         <CarouselContent>
           {images.map((image, index) => (
@@ -77,3 +84,4 @@ const ProductImageCarousel = ({ images, productName }: ProductImageCarouselProps
 };
 
 export default ProductImageCarousel;
+
