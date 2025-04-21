@@ -1,11 +1,12 @@
 
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { 
   Carousel,
   CarouselContent,
   CarouselItem,
   CarouselNext,
-  CarouselPrevious
+  CarouselPrevious,
+  type CarouselApi
 } from "@/components/ui/carousel";
 
 interface ProductImageCarouselProps {
@@ -15,6 +16,7 @@ interface ProductImageCarouselProps {
 
 const ProductImageCarousel = ({ images, productName }: ProductImageCarouselProps) => {
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [api, setApi] = useState<CarouselApi>();
   
   // Tek resim varsa carousel göstermeye gerek yok
   if (images.length <= 1) {
@@ -28,19 +30,28 @@ const ProductImageCarousel = ({ images, productName }: ProductImageCarouselProps
       </div>
     );
   }
+
+  useEffect(() => {
+    if (!api) return;
+    
+    const onSelect = () => {
+      setCurrentIndex(api.selectedScrollSnap());
+    };
+    
+    api.on("select", onSelect);
+    return () => {
+      api.off("select", onSelect);
+    };
+  }, [api]);
   
   return (
     <div className="space-y-4">
       <Carousel 
         className="w-full"
         opts={{
-          startIndex: currentIndex,
-          onChange: (api) => {
-            if (api) {
-              setCurrentIndex(api.selectedScrollSnap());
-            }
-          }
+          startIndex: currentIndex
         }}
+        setApi={setApi}
       >
         <CarouselContent>
           {images.map((image, index) => (
@@ -69,7 +80,10 @@ const ProductImageCarousel = ({ images, productName }: ProductImageCarouselProps
           <button 
             key={index} 
             className={`border rounded overflow-hidden aspect-square ${index === currentIndex ? 'ring-2 ring-shule-brown' : ''}`}
-            onClick={() => setCurrentIndex(index)}
+            onClick={() => {
+              setCurrentIndex(index);
+              api?.scrollTo(index);
+            }}
           >
             <img 
               src={image} 
@@ -84,4 +98,3 @@ const ProductImageCarousel = ({ images, productName }: ProductImageCarouselProps
 };
 
 export default ProductImageCarousel;
-
