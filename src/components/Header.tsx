@@ -1,11 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { ShoppingBag, Search, Menu, X, User, Heart } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-const Header: React.FC = () => {
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
+
+const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [cartCount, setCartCount] = useState(0);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const navigate = useNavigate();
+
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 50);
@@ -13,6 +19,44 @@ const Header: React.FC = () => {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  useEffect(() => {
+    const getUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      setIsAuthenticated(!!user);
+    };
+
+    getUser();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      setIsAuthenticated(!!session);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  useEffect(() => {
+    const savedCart = localStorage.getItem('shuleCart');
+    if (savedCart) {
+      try {
+        const parsedCart = JSON.parse(savedCart);
+        setCartCount(parsedCart.reduce((total: number, item: any) => total + item.quantity, 0));
+      } catch (e) {
+        console.error('Cart loading error:', e);
+      }
+    }
+
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'shuleCart') {
+        const newCart = e.newValue ? JSON.parse(e.newValue) : [];
+        setCartCount(newCart.reduce((total: number, item: any) => total + item.quantity, 0));
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, []);
+
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
     if (!isMenuOpen) {
@@ -21,7 +65,9 @@ const Header: React.FC = () => {
       document.body.style.overflow = 'auto';
     }
   };
-  return <header className="">
+
+  return (
+    <header className="fixed top-0 left-0 right-0 bg-white z-50 border-b border-gray-200">
       <div className="shule-container flex items-center justify-between">
         <div className="lg:hidden">
           <button onClick={toggleMenu} className="p-2">
@@ -75,22 +121,36 @@ const Header: React.FC = () => {
           <button className="p-1">
             <Search size={20} />
           </button>
-          <Link to="/account" className="p-1 hidden md:block">
-            <User size={20} />
-          </Link>
-          <Link to="/wishlist" className="p-1 hidden md:block">
-            <Heart size={20} />
-          </Link>
+          {isAuthenticated ? (
+            <>
+              <Link to="/account" className="p-1 hidden md:block">
+                <User size={20} />
+              </Link>
+              <Link to="/favorites" className="p-1 hidden md:block">
+                <Heart size={20} />
+              </Link>
+            </>
+          ) : (
+            <Button variant="ghost" onClick={() => navigate('/auth')} className="hidden md:block">
+              Giriş Yap
+            </Button>
+          )}
           <Link to="/cart" className="p-1 relative">
             <ShoppingBag size={20} />
-            {cartCount > 0 && <span className="absolute -top-1 -right-1 bg-shule-brown text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">
+            {cartCount > 0 && (
+              <span className="absolute -top-1 -right-1 bg-shule-brown text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">
                 {cartCount}
-              </span>}
+              </span>
+            )}
           </Link>
         </div>
       </div>
       
-      {isMenuOpen && <div className="fixed inset-0 bg-black bg-opacity-50 z-30 lg:hidden" onClick={toggleMenu} />}
-    </header>;
+      {isMenuOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-30 lg:hidden" onClick={toggleMenu} />
+      )}
+    </header>
+  );
 };
+
 export default Header;
