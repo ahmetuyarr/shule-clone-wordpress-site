@@ -126,15 +126,15 @@ const Account = () => {
   const fetchFavorites = async (userId: string) => {
     try {
       const { data, error } = await supabase
-        .from("favorites")
+        .from('favorites')
         .select(`
           *,
-          product: products (*)
+          product:products(*)
         `)
-        .eq("user_id", userId);
+        .eq('user_id', userId) as { data: FavoriteItem[] | null; error: unknown };
 
       if (error) throw error;
-      if (data) setFavorites(data as unknown as FavoriteItem[]);
+      if (data) setFavorites(data);
     } catch (error) {
       console.error("Error fetching favorites:", error);
     }
@@ -360,9 +360,9 @@ const Account = () => {
                                 onClick={async () => {
                                   try {
                                     await supabase
-                                      .from("favorites")
+                                      .from('favorites')
                                       .delete()
-                                      .eq("id", favorite.id);
+                                      .eq('id', favorite.id) as { error: unknown };
                                     
                                     fetchFavorites(user?.id as string);
                                     toast.success("Ürün favorilerden kaldırıldı");
