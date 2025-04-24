@@ -5,38 +5,10 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { OrderType, OrderItemType, OrderNotificationType } from "@/types/order";
 
-interface OrderType {
-  id: string;
-  created_at: string;
-  status: string;
-  total_amount: number;
-  tracking_number?: string;
-}
-
-interface OrderItemType {
-  id: string;
-  quantity: number;
-  price_at_purchase: number;
-  product: {
-    name: string;
-    image: string;
-  };
-}
-
-interface OrderNotificationType {
-  id: string;
-  message: string;
-  created_at: string;
-  read: boolean;
-}
-
 const OrdersTab = ({ user }: { user: User }) => {
   const [orders, setOrders] = useState<OrderType[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
   const [orderItems, setOrderItems] = useState<OrderItemType[]>([]);
   const [notifications, setNotifications] = useState<OrderNotificationType[]>([]);
-  const [unreadCount, setUnreadCount] = useState(0);
 
   useEffect(() => {
     fetchOrders();
@@ -68,12 +40,22 @@ const OrdersTab = ({ user }: { user: User }) => {
         .from('order_items')
         .select(`
           *,
-          product:products(name, image)
+          product:products(name, image, id)
         `)
         .eq('order_id', orderId);
 
       if (error) throw error;
-      if (data) setOrderItems(data);
+      if (data) {
+        const mappedItems = data.map(item => ({
+          ...item,
+          product: item.product ? {
+            name: item.product.name,
+            image: item.product.image,
+            id: item.product.id
+          } : undefined
+        }));
+        setOrderItems(mappedItems);
+      }
     } catch (error) {
       console.error("Error fetching order items:", error);
     }

@@ -37,6 +37,34 @@ const OrdersAdmin = () => {
     }
   };
 
+  const fetchOrderItems = async (orderId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('order_items')
+        .select(`
+          *,
+          product:products(name, image, id)
+        `)
+        .eq('order_id', orderId);
+
+      if (error) throw error;
+      if (data) {
+        const mappedItems = data.map(item => ({
+          ...item,
+          product: item.product ? {
+            name: item.product.name,
+            image: item.product.image,
+            id: item.product.id
+          } : undefined
+        }));
+        setOrderItems(mappedItems);
+      }
+    } catch (error) {
+      console.error("Error fetching order items:", error);
+      toast.error("Sipariş detayları yüklenirken bir hata oluştu");
+    }
+  };
+
   const updateOrderStatus = async (orderId: string, status: OrderType["status"]) => {
     try {
       const { error } = await supabase
@@ -70,28 +98,6 @@ const OrdersAdmin = () => {
     } catch (error) {
       console.error("Error updating order status:", error);
       toast.error("Sipariş durumu güncellenirken bir hata oluştu");
-    }
-  };
-
-  const fetchOrderItems = async (orderId: string) => {
-    try {
-      const { data, error } = await supabase
-        .from('order_items')
-        .select(`
-          *,
-          products (
-            id,
-            name,
-            image
-          )
-        `)
-        .eq('order_id', orderId);
-
-      if (error) throw error;
-      if (data) setOrderItems(data);
-    } catch (error) {
-      console.error("Error fetching order items:", error);
-      toast.error("Sipariş detayları yüklenirken bir hata oluştu");
     }
   };
 
@@ -344,17 +350,17 @@ const OrdersAdmin = () => {
                         {orderItems.map((item) => (
                           <TableRow key={item.id}>
                             <TableCell>
-                              {item.products?.image && (
+                              {item.product?.image && (
                                 <div className="w-12 h-12">
                                   <img
-                                    src={item.products.image}
-                                    alt={item.products?.name || "Ürün"}
+                                    src={item.product.image}
+                                    alt={item.product?.name || "Ürün"}
                                     className="w-full h-full object-cover rounded"
                                   />
                                 </div>
                               )}
                             </TableCell>
-                            <TableCell>{item.products?.name}</TableCell>
+                            <TableCell>{item.product?.name}</TableCell>
                             <TableCell className="text-right">{item.quantity}</TableCell>
                             <TableCell className="text-right">{item.price_at_purchase.toFixed(2)} ₺</TableCell>
                             <TableCell className="text-right">{(item.price_at_purchase * item.quantity).toFixed(2)} ₺</TableCell>

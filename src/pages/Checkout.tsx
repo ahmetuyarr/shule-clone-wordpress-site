@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -7,6 +6,7 @@ import Footer from "@/components/Footer";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { User } from "@supabase/supabase-js";
+import { Json } from "@/integrations/supabase/types";
 
 interface CheckoutFormData {
   firstName: string;
@@ -38,7 +38,6 @@ const Checkout = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Sepeti localStorage'dan yükle
     const savedCart = localStorage.getItem("shuleCart");
     if (savedCart) {
       try {
@@ -49,7 +48,6 @@ const Checkout = () => {
       }
     }
 
-    // Kullanıcı bilgilerini yükle
     const getUser = async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
@@ -60,7 +58,6 @@ const Checkout = () => {
 
       setUser(user);
 
-      // Kullanıcı profilini yükle
       const { data: profile } = await supabase
         .from("profiles")
         .select("*")
@@ -119,11 +116,17 @@ const Checkout = () => {
     setIsLoading(true);
 
     try {
-      // Sipariş oluştur
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('id', user.id)
+        .single();
+
       const { data: order, error: orderError } = await supabase
         .from("orders")
         .insert({
           user_id: user.id,
+          profile_id: profile?.id || user.id,
           total_amount: calculateGrandTotal(),
           status: "PENDING",
           shipping_address: {
@@ -135,7 +138,7 @@ const Checkout = () => {
             city: formData.city,
             postalCode: formData.postalCode,
             country: formData.country
-          },
+          } as Json,
           notes: formData.notes
         })
         .select()
@@ -143,7 +146,6 @@ const Checkout = () => {
 
       if (orderError) throw orderError;
 
-      // Sipariş öğelerini ekle
       const orderItems = cart.map(item => ({
         order_id: order.id,
         product_id: item.id,
@@ -157,7 +159,6 @@ const Checkout = () => {
 
       if (itemsError) throw itemsError;
 
-      // Bildirim oluştur
       const { error: notificationError } = await supabase
         .from("order_notifications")
         .insert({
@@ -168,7 +169,6 @@ const Checkout = () => {
 
       if (notificationError) console.error("Bildirim oluşturulurken hata:", notificationError);
 
-      // Sepeti temizle
       localStorage.removeItem("shuleCart");
       
       toast.success("Siparişiniz başarıyla oluşturuldu!");

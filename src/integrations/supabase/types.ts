@@ -323,6 +323,7 @@ export type Database = {
           shipping_address: Json | null
           status: Database["public"]["Enums"]["order_status"]
           total_amount: number
+          tracking_number: string | null
           updated_at: string
           user_id: string
         }
@@ -334,6 +335,7 @@ export type Database = {
           shipping_address?: Json | null
           status?: Database["public"]["Enums"]["order_status"]
           total_amount: number
+          tracking_number?: string | null
           updated_at?: string
           user_id: string
         }
@@ -345,6 +347,7 @@ export type Database = {
           shipping_address?: Json | null
           status?: Database["public"]["Enums"]["order_status"]
           total_amount?: number
+          tracking_number?: string | null
           updated_at?: string
           user_id?: string
         }
@@ -581,6 +584,8 @@ export type Database = {
         | "SHIPPED"
         | "DELIVERED"
         | "CANCELLED"
+        | "PREPARING"
+        | "CONFIRMED"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -702,6 +707,8 @@ export const Constants = {
         "SHIPPED",
         "DELIVERED",
         "CANCELLED",
+        "PREPARING",
+        "CONFIRMED",
       ],
     },
   },
