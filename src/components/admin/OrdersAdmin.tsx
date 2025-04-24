@@ -1,52 +1,16 @@
-
 import { useState, useEffect } from "react";
-import { Button } from "@/components/ui/button";
-import { 
-  Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
-} from "@/components/ui/select";
-import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-
-interface OrderType {
-  id: string;
-  user_id: string;
-  total_amount: number;
-  status: 'PENDING' | 'CONFIRMED' | 'PREPARING' | 'SHIPPED' | 'DELIVERED' | 'CANCELLED';
-  created_at: string;
-  shipping_address: {
-    firstName: string;
-    lastName: string;
-    address: string;
-    city: string;
-    postalCode: string;
-    country: string;
-    phone: string;
-  };
-  notes?: string;
-  tracking_number?: string;
-  profiles: {
-    full_name: string;
-    email: string;
-  };
-}
+import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { OrderType, OrderItemType } from "@/types/order";
 
 const OrdersAdmin = () => {
   const [orders, setOrders] = useState<OrderType[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedOrder, setSelectedOrder] = useState<OrderType | null>(null);
-  const [orderItems, setOrderItems] = useState<any[]>([]);
+  const [orderItems, setOrderItems] = useState<OrderItemType[]>([]);
   const [trackingNumber, setTrackingNumber] = useState("");
 
   const fetchOrders = async () => {
@@ -64,12 +28,48 @@ const OrdersAdmin = () => {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      if (data) setOrders(data as OrderType[]);
+      setOrders(data as OrderType[]);
     } catch (error) {
       console.error("Error fetching orders:", error);
       toast.error("Siparişler yüklenirken bir hata oluştu");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const updateOrderStatus = async (orderId: string, status: OrderType["status"]) => {
+    try {
+      const { error } = await supabase
+        .from('orders')
+        .update({ status })
+        .eq('id', orderId);
+
+      if (error) throw error;
+      
+      // Send notification to user
+      const { error: notificationError } = await supabase
+        .from('order_notifications')
+        .insert({
+          order_id: orderId,
+          user_id: selectedOrder?.user_id,
+          message: getStatusMessage(status)
+        });
+
+      if (notificationError) throw notificationError;
+
+      // Update local state
+      setOrders(orders.map(order => 
+        order.id === orderId ? { ...order, status } : order
+      ));
+      
+      if (selectedOrder && selectedOrder.id === orderId) {
+        setSelectedOrder({ ...selectedOrder, status });
+      }
+
+      toast.success("Sipariş durumu güncellendi");
+    } catch (error) {
+      console.error("Error updating order status:", error);
+      toast.error("Sipariş durumu güncellenirken bir hata oluştu");
     }
   };
 
@@ -108,42 +108,6 @@ const OrdersAdmin = () => {
   const closeDetails = () => {
     setSelectedOrder(null);
     setOrderItems([]);
-  };
-
-  const updateOrderStatus = async (orderId: string, status: string) => {
-    try {
-      const { error } = await supabase
-        .from('orders')
-        .update({ status })
-        .eq('id', orderId);
-
-      if (error) throw error;
-      
-      // Send notification to user
-      const { error: notificationError } = await supabase
-        .from('order_notifications')
-        .insert({
-          order_id: orderId,
-          user_id: selectedOrder?.user_id,
-          message: getStatusMessage(status)
-        });
-
-      if (notificationError) throw notificationError;
-
-      // Update local state
-      setOrders(orders.map(order => 
-        order.id === orderId ? { ...order, status: status as any } : order
-      ));
-      
-      if (selectedOrder && selectedOrder.id === orderId) {
-        setSelectedOrder({ ...selectedOrder, status: status as any });
-      }
-
-      toast.success("Sipariş durumu güncellendi");
-    } catch (error) {
-      console.error("Error updating order status:", error);
-      toast.error("Sipariş durumu güncellenirken bir hata oluştu");
-    }
   };
 
   const updateTrackingNumber = async () => {

@@ -276,10 +276,49 @@ export type Database = {
           },
         ]
       }
+      order_notifications: {
+        Row: {
+          created_at: string | null
+          id: string
+          message: string
+          order_id: string | null
+          read: boolean | null
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          message: string
+          order_id?: string | null
+          read?: boolean | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          message?: string
+          order_id?: string | null
+          read?: boolean | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "order_notifications_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       orders: {
         Row: {
           created_at: string
           id: string
+          notes: string | null
           profile_id: string
           shipping_address: Json | null
           status: Database["public"]["Enums"]["order_status"]
@@ -290,6 +329,7 @@ export type Database = {
         Insert: {
           created_at?: string
           id?: string
+          notes?: string | null
           profile_id: string
           shipping_address?: Json | null
           status?: Database["public"]["Enums"]["order_status"]
@@ -300,6 +340,7 @@ export type Database = {
         Update: {
           created_at?: string
           id?: string
+          notes?: string | null
           profile_id?: string
           shipping_address?: Json | null
           status?: Database["public"]["Enums"]["order_status"]

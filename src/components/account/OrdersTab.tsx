@@ -1,9 +1,9 @@
-
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { User } from "@supabase/supabase-js";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { OrderType, OrderItemType, OrderNotificationType } from "@/types/order";
 
 interface OrderType {
   id: string;
@@ -84,12 +84,12 @@ const OrdersTab = ({ user }: { user: User }) => {
       const { data, error } = await supabase
         .from('order_notifications')
         .select('*')
-        .eq('user_id', user.id)
+        .eq('user_id', user?.id)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
       if (data) {
-        setNotifications(data);
+        setNotifications(data as OrderNotificationType[]);
         setUnreadCount(data.filter(n => !n.read).length);
       }
     } catch (error) {
@@ -102,7 +102,7 @@ const OrdersTab = ({ user }: { user: User }) => {
       const { error } = await supabase
         .from('order_notifications')
         .update({ read: true })
-        .eq('user_id', user.id)
+        .eq('user_id', user?.id)
         .eq('read', false);
 
       if (error) throw error;
