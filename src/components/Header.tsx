@@ -4,12 +4,14 @@ import { ShoppingBag, Search, Menu, X, User, Heart } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { SearchDialog } from './SearchDialog';
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [cartCount, setCartCount] = useState(0);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -118,7 +120,7 @@ const Header = () => {
         </nav>
         
         <div className="flex items-center space-x-4">
-          <button className="p-1">
+          <button className="p-1" onClick={() => setIsSearchOpen(true)}>
             <Search size={20} />
           </button>
           {isAuthenticated ? (
@@ -146,8 +148,13 @@ const Header = () => {
         </div>
       </div>
       
+      <SearchDialog
+        open={isSearchOpen}
+        onOpenChange={setIsSearchOpen}
+      />
+      
       {isMenuOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 z-30 lg:hidden" onClick={toggleMenu} />
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-30 lg:hidden" onClick={() => setIsMenuOpen(false)} />
       )}
     </header>
   );
