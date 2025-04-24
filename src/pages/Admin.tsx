@@ -1,5 +1,5 @@
-
 import React, { useState } from "react";
+import { useAdminGuard } from "@/hooks/use-admin-guard";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -12,6 +12,8 @@ import OrdersAdmin from "@/components/admin/OrdersAdmin";
 import { Toaster } from "@/components/ui/toaster";
 
 const Admin = () => {
+  useAdminGuard();
+  
   const [activeTab, setActiveTab] = useState("products");
   
   return (
