@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { User } from "@supabase/supabase-js";
@@ -9,6 +10,9 @@ const OrdersTab = ({ user }: { user: User }) => {
   const [orders, setOrders] = useState<OrderType[]>([]);
   const [orderItems, setOrderItems] = useState<OrderItemType[]>([]);
   const [notifications, setNotifications] = useState<OrderNotificationType[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
+  const [unreadCount, setUnreadCount] = useState(0);
 
   useEffect(() => {
     fetchOrders();
