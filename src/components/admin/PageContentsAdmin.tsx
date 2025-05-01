@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -38,7 +37,13 @@ const PageContentsAdmin = () => {
         .order("title");
 
       if (error) throw error;
-      setPageContents(data || []);
+      // Parse the JSON content to ensure it's a proper object
+      setPageContents(data?.map(item => ({
+        ...item,
+        content: typeof item.content === 'string' 
+          ? JSON.parse(item.content) 
+          : (item.content || {})
+      })) || []);
     } catch (error) {
       console.error("Sayfa içerikleri yüklenirken hata oluştu:", error);
       toast({

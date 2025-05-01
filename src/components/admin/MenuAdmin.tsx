@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -481,14 +480,14 @@ const MenuAdmin = () => {
             <div className="space-y-2">
               <Label htmlFor="parent_id">Üst Menü (İsteğe Bağlı)</Label>
               <Select
-                value={formData.parent_id || ""}
+                value={formData.parent_id || undefined}
                 onValueChange={(value) => handleSelectChange("parent_id", value === "" ? null : value)}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Ana menü öğesi olarak ekle" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Ana menü öğesi olarak ekle</SelectItem>
+                  <SelectItem value="none">Ana menü öğesi olarak ekle</SelectItem>
                   {getTopLevelMenuOptions()}
                 </SelectContent>
               </Select>
