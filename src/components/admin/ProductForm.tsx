@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -399,14 +398,14 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, isOpen, onClose }) =
             <div className="space-y-2">
               <Label htmlFor="collection_id">Koleksiyon</Label>
               <Select 
-                value={formData.collection_id || ''} 
+                value={formData.collection_id || undefined} 
                 onValueChange={(value) => handleSelectChange('collection_id', value)}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Koleksiyon seçiniz (opsiyonel)" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Koleksiyon yok</SelectItem>
+                  <SelectItem value="none">Koleksiyon yok</SelectItem>
                   {collectionOptions.map((collection) => (
                     <SelectItem key={collection.id} value={collection.id}>
                       {collection.name}

@@ -231,7 +231,7 @@ const PageContentForm: React.FC<PageContentFormProps> = ({
               <div className="space-y-2">
                 <Label htmlFor="page_key">Sayfa Türü</Label>
                 <Select
-                  value={formData.page_key}
+                  value={formData.page_key || undefined}
                   onValueChange={(value) => handleSelectChange("page_key", value)}
                 >
                   <SelectTrigger>

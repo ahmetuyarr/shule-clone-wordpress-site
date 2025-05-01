@@ -72,7 +72,7 @@ const MenuAdmin = () => {
   const handleSelectChange = (name: string, value: string | null) => {
     setFormData(prev => ({
       ...prev,
-      [name]: value
+      [name]: value === "none" ? null : value
     }));
   };
 
@@ -481,7 +481,7 @@ const MenuAdmin = () => {
               <Label htmlFor="parent_id">Üst Menü (İsteğe Bağlı)</Label>
               <Select
                 value={formData.parent_id || undefined}
-                onValueChange={(value) => handleSelectChange("parent_id", value === "" ? null : value)}
+                onValueChange={(value) => handleSelectChange("parent_id", value)}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Ana menü öğesi olarak ekle" />
