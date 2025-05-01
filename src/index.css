@@ -54,6 +54,7 @@
     overflow-x: hidden;
     overflow-y: auto;
     min-height: 100vh;
+    touch-action: manipulation;
   }
 }
 
@@ -92,5 +93,49 @@
   
   .shule-input {
     @apply w-full p-3 border border-shule-grey focus:border-shule-brown focus:outline-none transition-all duration-300 ease-in-out;
+  }
+  
+  /* Mobile navbar styles */
+  .mobile-navbar {
+    @apply fixed top-0 left-0 w-full h-screen bg-white z-50 flex flex-col overflow-y-auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  /* Fix tabs overflow on mobile */
+  .tabs-container {
+    @apply overflow-x-auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none; /* Firefox */
+  }
+  
+  .tabs-container::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Edge */
+  }
+}
+
+/* Enhanced mobile responsiveness */
+@media (max-width: 767px) {
+  .shule-container {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+  
+  .dialog-content {
+    width: 95vw !important;
+    max-width: 95vw !important;
+    padding: 1rem !important;
+  }
+  
+  .table-container {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+/* Mobile menu fixes */
+@media (max-width: 1023px) {
+  [data-state="open"].mobile-menu {
+    display: flex;
+    flex-direction: column;
   }
 }

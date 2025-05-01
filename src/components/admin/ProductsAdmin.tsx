@@ -65,6 +65,7 @@ const ProductsAdmin = () => {
   };
 
   const handleEditProduct = (product: Product) => {
+    console.log("Editing product:", product);
     setCurrentProduct(product);
     setIsFormOpen(true);
   };
@@ -106,6 +107,7 @@ const ProductsAdmin = () => {
 
   const handleFormClose = (refreshData = false) => {
     setIsFormOpen(false);
+    setCurrentProduct(null);
     if (refreshData) {
       fetchProducts();
     }

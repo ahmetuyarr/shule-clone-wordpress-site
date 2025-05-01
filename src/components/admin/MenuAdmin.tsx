@@ -78,6 +78,7 @@ const MenuAdmin = () => {
   };
 
   const handleAddMenuItem = () => {
+    console.log("Opening add menu item form");
     setCurrentMenuItem(null);
     setFormData({
       name: "",
@@ -89,6 +90,7 @@ const MenuAdmin = () => {
   };
 
   const handleEditMenuItem = (item: MenuItem) => {
+    console.log("Opening edit menu item form", item);
     setCurrentMenuItem(item);
     setFormData({
       name: item.name,
