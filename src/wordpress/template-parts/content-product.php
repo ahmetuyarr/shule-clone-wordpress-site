@@ -43,24 +43,118 @@ $stock_quantity = $product->get_stock_quantity();
                     <div class="product-gallery">
                         <?php 
                         // Ana ürün görseli
-                        if (has_post_thumbnail()) {
-                            echo '<div class="mb-4 aspect-square overflow-hidden">';
-                            echo woocommerce_get_product_thumbnail('full');
-                            echo '</div>';
-                        }
+                        if (has_post_thumbnail()) : ?>
+                            <div class="mb-4 aspect-square overflow-hidden rounded-lg border cursor-zoom-in" data-image-id="main">
+                                <?php echo get_the_post_thumbnail($product->get_id(), 'full', array('class' => 'w-full h-full object-cover')); ?>
+                            </div>
+                        <?php endif; ?>
                         
+                        <?php 
                         // Galeri görselleri
-                        if (!empty($gallery_images)) {
-                            echo '<div class="grid grid-cols-4 gap-4">';
-                            foreach ($gallery_images as $image_id) {
-                                echo '<div class="aspect-square cursor-pointer border-2 border-transparent hover:border-shule-brown">';
-                                echo wp_get_attachment_image($image_id, 'thumbnail', false, array('class' => 'w-full h-full object-cover'));
-                                echo '</div>';
-                            }
-                            echo '</div>';
-                        }
-                        ?>
+                        if (!empty($gallery_images)) : ?>
+                            <div class="grid grid-cols-5 gap-2">
+                                <?php if (has_post_thumbnail()) : ?>
+                                <div class="aspect-square cursor-pointer border-2 border-shule-brown hover:border-shule-brown rounded" data-thumb-id="main">
+                                    <?php echo get_the_post_thumbnail($product->get_id(), 'thumbnail', array('class' => 'w-full h-full object-cover')); ?>
+                                </div>
+                                <?php endif; ?>
+                                
+                                <?php foreach ($gallery_images as $image_id) : ?>
+                                <div class="aspect-square cursor-pointer border-2 border-transparent hover:border-shule-brown rounded" data-thumb-id="<?php echo esc_attr($image_id); ?>">
+                                    <?php echo wp_get_attachment_image($image_id, 'thumbnail', false, array('class' => 'w-full h-full object-cover')); ?>
+                                </div>
+                                <?php endforeach; ?>
+                            </div>
+                        <?php endif; ?>
                     </div>
+                    
+                    <!-- Yakınlaştırma Modal -->
+                    <div id="image-zoom-modal" class="fixed inset-0 bg-black bg-opacity-80 z-50 hidden flex items-center justify-center">
+                        <div class="max-w-4xl max-h-[90vh] overflow-auto p-4 relative">
+                            <div id="zoom-image-container" class="relative">
+                                <!-- Burada JavaScript ile görseli değiştireceğiz -->
+                            </div>
+                            <button id="close-zoom" class="absolute top-2 right-2 text-white bg-black bg-opacity-50 rounded-full p-2">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <script>
+                    document.addEventListener('DOMContentLoaded', function() {
+                        // Thumbnail tıklaması
+                        document.querySelectorAll('[data-thumb-id]').forEach(thumb => {
+                            thumb.addEventListener('click', function() {
+                                const imageId = this.getAttribute('data-thumb-id');
+                                
+                                // Aktif thumbnail'i güncelle
+                                document.querySelectorAll('[data-thumb-id]').forEach(t => {
+                                    t.classList.remove('border-shule-brown');
+                                    t.classList.add('border-transparent');
+                                });
+                                this.classList.remove('border-transparent');
+                                this.classList.add('border-shule-brown');
+                                
+                                // Ana görseli güncelle
+                                if (imageId === 'main') {
+                                    // Ana ürün görseli
+                                    const mainImage = document.querySelector('[data-image-id="main"]');
+                                    if (mainImage) {
+                                        mainImage.style.display = 'block';
+                                    }
+                                    // Diğer görselleri gizle
+                                    document.querySelectorAll('[data-image-id]:not([data-image-id="main"])').forEach(img => {
+                                        img.style.display = 'none';
+                                    });
+                                } else {
+                                    // Ana görseli gizle
+                                    const mainImage = document.querySelector('[data-image-id="main"]');
+                                    if (mainImage) {
+                                        mainImage.style.display = 'none';
+                                    }
+                                    
+                                    // İlgili görseli göster, diğerlerini gizle
+                                    document.querySelectorAll('[data-image-id]').forEach(img => {
+                                        if (img.getAttribute('data-image-id') === imageId) {
+                                            img.style.display = 'block';
+                                        } else if (img.getAttribute('data-image-id') !== 'main') {
+                                            img.style.display = 'none';
+                                        }
+                                    });
+                                }
+                            });
+                        });
+                        
+                        // Yakınlaştırma işlevi
+                        const zoomModal = document.getElementById('image-zoom-modal');
+                        const zoomContainer = document.getElementById('zoom-image-container');
+                        const closeZoomBtn = document.getElementById('close-zoom');
+                        
+                        // Görsel tıklaması için dinleyici
+                        document.querySelectorAll('.product-gallery [data-image-id]').forEach(img => {
+                            img.addEventListener('click', function() {
+                                const imgSrc = this.querySelector('img').src;
+                                zoomContainer.innerHTML = `<img src="${imgSrc}" class="max-w-none" style="min-width: 150%; min-height: 150%" />`;
+                                zoomModal.classList.remove('hidden');
+                                document.body.classList.add('overflow-hidden');
+                            });
+                        });
+                        
+                        // Modal kapatma
+                        closeZoomBtn.addEventListener('click', function() {
+                            zoomModal.classList.add('hidden');
+                            document.body.classList.remove('overflow-hidden');
+                        });
+                        
+                        // Modal dışına tıklama
+                        zoomModal.addEventListener('click', function(e) {
+                            if (e.target === zoomModal) {
+                                zoomModal.classList.add('hidden');
+                                document.body.classList.remove('overflow-hidden');
+                            }
+                        });
+                    });
+                    </script>
                 </div>
                 
                 <!-- Ürün Bilgileri -->

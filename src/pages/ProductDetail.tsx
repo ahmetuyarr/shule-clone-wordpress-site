@@ -178,13 +178,22 @@ const ProductDetail = () => {
   const getProductImages = () => {
     if (!product) return [];
     
-    // images dizisi varsa ve içinde öğe varsa onu kullan
-    if (product.images && product.images.length > 0) {
-      return product.images;
+    // Ana görsel ve diğer görselleri bir araya getir
+    let allImages = [];
+    
+    // Ana resmi ekle
+    if (product.image) {
+      allImages.push(product.image);
     }
     
-    // Yoksa, ana resmi tek öğeli dizi olarak döndür
-    return [product.image];
+    // Diğer resimleri ekle (eğer varsa)
+    if (product.images && Array.isArray(product.images) && product.images.length > 0) {
+      // Tekrar eden resimleri filtrele
+      const additionalImages = product.images.filter(img => img !== product.image);
+      allImages = [...allImages, ...additionalImages];
+    }
+    
+    return allImages;
   };
 
   if (isLoading) {
