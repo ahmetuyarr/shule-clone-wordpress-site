@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { ShoppingBag, Search, Menu, X, User, Heart } from 'lucide-react';
@@ -69,18 +70,18 @@ const Header = () => {
   };
 
   return (
-    <header className="fixed top-0 left-0 right-0 bg-white z-50 border-b border-gray-200">
-      <div className="shule-container flex items-center justify-between">
-        <div className="lg:hidden">
-          <button onClick={toggleMenu} className="p-2">
+    <header className={`fixed top-0 left-0 right-0 bg-white z-50 border-b border-gray-200 ${isScrolled ? 'shadow-sm' : ''}`}>
+      <div className="shule-container flex items-center justify-between py-4">
+        <div className="flex items-center">
+          <button onClick={toggleMenu} className="p-2 lg:hidden">
             {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
-        </div>
-        
-        <div className="flex-1 lg:flex-none">
-          <Link to="/" className="block">
-            <h1 className="text-5xl text-zinc-950 font-bold">ÖZEL ÇANTA</h1>
-          </Link>
+
+          <div className="mx-auto lg:mx-0">
+            <Link to="/" className="block">
+              <h1 className="text-3xl md:text-5xl text-zinc-950 font-bold">ÖZEL ÇANTA</h1>
+            </Link>
+          </div>
         </div>
         
         <nav className={`fixed lg:relative top-0 left-0 h-full w-full lg:w-auto lg:h-auto bg-white lg:bg-transparent transform ${isMenuOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'} transition-transform duration-300 ease-in-out lg:flex lg:items-center z-40`}>
@@ -92,27 +93,27 @@ const Header = () => {
           </div>
           <ul className="flex flex-col lg:flex-row space-y-4 lg:space-y-0 lg:space-x-6 p-6 lg:p-0">
             <li>
-              <Link to="/" className="uppercase text-sm font-medium tracking-wide shule-link">
+              <Link to="/" onClick={() => setIsMenuOpen(false)} className="uppercase text-sm font-medium tracking-wide shule-link">
                 Ana Sayfa
               </Link>
             </li>
             <li>
-              <Link to="/products" className="uppercase text-sm font-medium tracking-wide shule-link">
+              <Link to="/products" onClick={() => setIsMenuOpen(false)} className="uppercase text-sm font-medium tracking-wide shule-link">
                 Ürünler
               </Link>
             </li>
             <li>
-              <Link to="/collections" className="uppercase text-sm font-medium tracking-wide shule-link">
+              <Link to="/collections" onClick={() => setIsMenuOpen(false)} className="uppercase text-sm font-medium tracking-wide shule-link">
                 Koleksiyonlar
               </Link>
             </li>
             <li>
-              <Link to="/about" className="uppercase text-sm font-medium tracking-wide shule-link">
+              <Link to="/about" onClick={() => setIsMenuOpen(false)} className="uppercase text-sm font-medium tracking-wide shule-link">
                 Hakkımızda
               </Link>
             </li>
             <li>
-              <Link to="/contact" className="uppercase text-sm font-medium tracking-wide shule-link">
+              <Link to="/contact" onClick={() => setIsMenuOpen(false)} className="uppercase text-sm font-medium tracking-wide shule-link">
                 İletişim
               </Link>
             </li>
