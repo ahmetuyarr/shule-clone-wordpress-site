@@ -2,64 +2,23 @@
 import React, { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import Editor from "react-simple-wysiwyg";
-import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { ExternalLink, Info, Layout, Palette, FileText, Link as LinkIcon, Eye } from "lucide-react";
-import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
+import { Info, Layout, FileText } from "lucide-react";
 
-interface PageContent {
-  id: string;
-  title: string;
-  page_key: string;
-  content: Record<string, any>;
-  created_at?: string;
-  updated_at?: string;
-}
+// Import our refactored components
+import GeneralTab from "./page-content/GeneralTab";
+import ContentSections from "./page-content/ContentSections";
+import DesignTab from "./page-content/DesignTab";
+import PageSidebar from "./page-content/PageSidebar";
+import { PageContent, PAGE_TYPES } from "./page-content/types";
 
 interface PageContentFormProps {
   pageContent: PageContent | null;
   isOpen: boolean;
   onClose: (refreshData?: boolean) => void;
 }
-
-const PAGE_TYPES = [
-  { value: "about", label: "Hakkımızda", system: true },
-  { value: "contact", label: "İletişim", system: true },
-  { value: "terms", label: "Kullanım Koşulları", system: false },
-  { value: "privacy", label: "Gizlilik Politikası", system: false },
-  { value: "faq", label: "Sıkça Sorulan Sorular", system: false },
-  { value: "home", label: "Ana Sayfa", system: true },
-  { value: "shipping", label: "Kargo Bilgileri", system: false },
-  { value: "returns", label: "İade Politikası", system: false },
-  { value: "sizing", label: "Beden Rehberi", system: false },
-  { value: "products", label: "Ürünler", system: true },
-  { value: "collections", label: "Koleksiyonlar", system: true },
-  { value: "bestsellers", label: "Çok Satanlar", system: true },
-  { value: "new", label: "Yeni Ürünler", system: true },
-  { value: "custom", label: "Özel Sayfa", system: false },
-];
 
 const PageContentForm: React.FC<PageContentFormProps> = ({
   pageContent,
@@ -169,70 +128,6 @@ const PageContentForm: React.FC<PageContentFormProps> = ({
     }));
   };
 
-  const getContentSections = () => {
-    switch (formData.page_key) {
-      case "about":
-        return [
-          { key: "intro", label: "Giriş Metni" },
-          { key: "mission", label: "Misyonumuz" },
-          { key: "vision", label: "Vizyonumuz" },
-          { key: "story", label: "Hikayemiz" },
-          { key: "team", label: "Ekibimiz" },
-        ];
-      case "contact":
-        return [
-          { key: "info", label: "İletişim Bilgileri" },
-          { key: "address", label: "Adres" },
-          { key: "phone", label: "Telefon" },
-          { key: "email", label: "E-posta" },
-          { key: "map", label: "Harita Embed Kodu" },
-          { key: "hours", label: "Çalışma Saatleri" },
-        ];
-      case "home":
-        return [
-          { key: "welcome", label: "Karşılama Mesajı" },
-          { key: "featured", label: "Öne Çıkan İçerik" },
-          { key: "promotion", label: "Promosyon Mesajı" },
-          { key: "about", label: "Hakkında Kısa Bilgi" },
-        ];
-      case "faq":
-        return [
-          { key: "intro", label: "Giriş Metni" },
-          { key: "faqs", label: "Sıkça Sorulan Sorular" },
-        ];
-      case "shipping":
-        return [
-          { key: "intro", label: "Giriş Bilgisi" },
-          { key: "policies", label: "Kargo Politikaları" },
-          { key: "timeframes", label: "Teslimat Süreleri" },
-          { key: "costs", label: "Kargo Ücretleri" },
-        ];
-      case "returns":
-        return [
-          { key: "intro", label: "Giriş Bilgisi" },
-          { key: "policies", label: "İade Politikaları" },
-          { key: "process", label: "İade Süreci" },
-          { key: "conditions", label: "İade Şartları" },
-        ];
-      case "sizing":
-        return [
-          { key: "intro", label: "Giriş Bilgisi" },
-          { key: "measurements", label: "Ölçü Tablosu" },
-          { key: "guide", label: "Ölçü Alma Rehberi" },
-          { key: "tips", label: "Beden Seçme İpuçları" },
-        ];
-      case "privacy":
-      case "terms":
-      case "products":
-      case "collections":
-      case "bestsellers":
-      case "new":
-      case "custom":
-      default:
-        return [{ key: "content", label: "İçerik" }];
-    }
-  };
-
   const validateForm = () => {
     if (!formData.title.trim()) {
       toast({
@@ -339,10 +234,6 @@ const PageContentForm: React.FC<PageContentFormProps> = ({
     }
   };
 
-  const isSystemPage = (pageKey: string) => {
-    return PAGE_TYPES.find(pt => pt.value === pageKey)?.system || false;
-  };
-
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
@@ -368,188 +259,40 @@ const PageContentForm: React.FC<PageContentFormProps> = ({
                   </TabsTrigger>
                 </TabsList>
 
-                <TabsContent value="general" className="space-y-4">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="title">Sayfa Başlığı</Label>
-                      <Input
-                        id="title"
-                        name="title"
-                        value={formData.title}
-                        onChange={handleInputChange}
-                        placeholder="Sayfa başlığını giriniz"
-                      />
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="page_key">Sayfa Türü</Label>
-                      <Select
-                        value={PAGE_TYPES.some(pt => pt.value === formData.page_key) 
-                          ? formData.page_key 
-                          : "custom"}
-                        onValueChange={(value) => handleSelectChange("page_key", value)}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Sayfa türünü seçin" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <div className="pb-1 mb-1 border-b">
-                            <p className="px-2 py-1 text-xs font-medium text-muted-foreground">Sistem Sayfaları</p>
-                          </div>
-                          {PAGE_TYPES.filter(pt => pt.system).map(pageType => (
-                            <SelectItem key={pageType.value} value={pageType.value}>
-                              {pageType.label}
-                            </SelectItem>
-                          ))}
-                          <div className="pt-1 pb-1 mb-1 border-t border-b">
-                            <p className="px-2 py-1 text-xs font-medium text-muted-foreground">Genel Sayfalar</p>
-                          </div>
-                          {PAGE_TYPES.filter(pt => !pt.system && pt.value !== 'custom').map(pageType => (
-                            <SelectItem key={pageType.value} value={pageType.value}>
-                              {pageType.label}
-                            </SelectItem>
-                          ))}
-                          <div className="pt-1 border-t">
-                            <SelectItem value="custom">Özel Sayfa</SelectItem>
-                          </div>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-
-                  {formData.page_key === "custom" && (
-                    <div className="space-y-2">
-                      <Label htmlFor="customPageKey">Özel Sayfa Anahtarı</Label>
-                      <Input
-                        id="customPageKey"
-                        name="customPageKey"
-                        value={customPageKey}
-                        onChange={handleCustomPageKeyChange}
-                        placeholder="Özel sayfa anahtarını giriniz (ör: hakkimizda, urunler)"
-                      />
-                      <p className="text-xs text-muted-foreground">
-                        URL'de kullanılacak benzersiz bir anahtar girin (örn: 'hakkimizda' sayfası için '/page/hakkimizda')
-                      </p>
-                    </div>
-                  )}
+                <TabsContent value="general">
+                  <GeneralTab
+                    title={formData.title}
+                    pageKey={formData.page_key}
+                    customPageKey={customPageKey}
+                    pageTypes={PAGE_TYPES}
+                    onInputChange={handleInputChange}
+                    onSelectChange={handleSelectChange}
+                    onCustomPageKeyChange={handleCustomPageKeyChange}
+                  />
                 </TabsContent>
 
                 <TabsContent value="content">
-                  <div className="space-y-6">
-                    {getContentSections().map((section) => (
-                      <Card key={section.key} className="overflow-hidden">
-                        <CardContent className="p-4">
-                          <Label htmlFor={section.key} className="block mb-3">
-                            {section.label}
-                          </Label>
-                          <Editor
-                            value={formData.content[section.key] || ""}
-                            onChange={(e: any) => 
-                              handleContentChange(section.key, e.target.value)
-                            }
-                            containerProps={{
-                              className: "min-h-[250px] border rounded-md overflow-hidden",
-                            }}
-                          />
-                        </CardContent>
-                      </Card>
-                    ))}
-                  </div>
+                  <ContentSections
+                    pageKey={formData.page_key}
+                    content={formData.content}
+                    onContentChange={handleContentChange}
+                  />
                 </TabsContent>
 
                 <TabsContent value="design">
-                  <Card>
-                    <CardContent className="p-4">
-                      <div className="text-center py-8">
-                        <Palette size={48} className="mx-auto text-muted-foreground mb-4" />
-                        <h3 className="text-lg font-medium mb-2">Sayfa Tasarım Seçenekleri</h3>
-                        <p className="text-muted-foreground">
-                          Bu sayfanın tasarım ayarlarını yapabilirsiniz. (Yakında eklenecek)
-                        </p>
-                      </div>
-                    </CardContent>
-                  </Card>
+                  <DesignTab />
                 </TabsContent>
               </Tabs>
             </div>
 
             <div className="space-y-4">
-              <Card>
-                <CardContent className="p-4">
-                  <h3 className="text-sm font-medium mb-2">Sayfa Önizleme</h3>
-                  <div className="text-muted-foreground text-sm mb-3">
-                    Sayfanız şu adreste yayınlanacak:
-                  </div>
-                  <div className="flex items-center gap-2 mb-4">
-                    <Badge variant="outline" className="px-2 py-1 text-xs">
-                      <code className="text-xs">{previewUrl}</code>
-                    </Badge>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-6 w-6"
-                      asChild
-                      disabled={!isEditing}
-                    >
-                      <a href={previewUrl} target="_blank" rel="noopener noreferrer">
-                        <ExternalLink size={14} />
-                      </a>
-                    </Button>
-                  </div>
-
-                  {isEditing && (
-                    <div className="mt-2">
-                      <a 
-                        href={previewUrl} 
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                        className="w-full bg-slate-100 text-sm text-center py-2 rounded flex items-center justify-center gap-1 hover:bg-slate-200 transition-colors"
-                      >
-                        <Eye size={14} /> Sayfayı Önizle
-                      </a>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardContent className="p-4">
-                  <h3 className="text-sm font-medium mb-2">Sayfa Durumu</h3>
-                  <div className="space-y-2">
-                    <div className="flex justify-between items-center text-sm">
-                      <span>Sistem sayfası:</span>
-                      <Badge variant={isSystemPage(formData.page_key) ? "default" : "outline"}>
-                        {isSystemPage(formData.page_key) ? "Evet" : "Hayır"}
-                      </Badge>
-                    </div>
-                    <div className="flex justify-between items-center text-sm">
-                      <span>Son güncelleme:</span>
-                      <span className="text-muted-foreground">
-                        {pageContent?.updated_at 
-                          ? new Date(pageContent.updated_at).toLocaleDateString('tr-TR') 
-                          : "-"}
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="mt-4 pt-4 border-t">
-                    <h3 className="text-sm font-medium mb-2">Menü Bağlantısı</h3>
-                    <p className="text-xs text-muted-foreground mb-3">
-                      Bu sayfayı site menünüze eklemek için:
-                    </p>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="w-full text-xs"
-                      asChild
-                    >
-                      <a href="/admin?tab=menu" target="_blank" rel="noopener noreferrer">
-                        <LinkIcon size={14} className="mr-1" /> Menü Yönetimine Git
-                      </a>
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
+              <PageSidebar
+                previewUrl={previewUrl}
+                isEditing={isEditing}
+                pageKey={formData.page_key}
+                pageTypes={PAGE_TYPES}
+                updatedAt={pageContent?.updated_at}
+              />
             </div>
           </div>
 
