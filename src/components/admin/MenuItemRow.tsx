@@ -2,7 +2,7 @@
 import React from "react";
 import { TableRow, TableCell } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { Edit, Trash2, ChevronUp, ChevronDown } from "lucide-react";
+import { Edit, Trash2, ChevronUp, ChevronDown, ExternalLink } from "lucide-react";
 
 interface MenuItem {
   id: string;
@@ -36,6 +36,14 @@ const MenuItemRow: React.FC<MenuItemRowProps> = ({
   onMoveUp,
   onMoveDown,
 }) => {
+  // Helper to get the full link (external or internal)
+  const getFullLink = (link: string) => {
+    if (link.startsWith("http")) {
+      return link;
+    }
+    return `/${link.startsWith("/") ? link.substring(1) : link}`;
+  };
+
   return (
     <TableRow>
       <TableCell>
@@ -50,11 +58,17 @@ const MenuItemRow: React.FC<MenuItemRowProps> = ({
         </div>
       </TableCell>
       <TableCell>
-        <span className="text-blue-600 hover:underline">
-          <a href={item.link.startsWith("http") ? item.link : `/${item.link}`} target="_blank" rel="noopener noreferrer">
+        <a 
+          href={getFullLink(item.link)} 
+          className="text-blue-600 hover:underline"
+          target="_blank" 
+          rel="noopener noreferrer"
+        >
+          <span className="flex items-center">
             {item.link}
-          </a>
-        </span>
+            <ExternalLink size={14} className="ml-1" />
+          </span>
+        </a>
       </TableCell>
       <TableCell>{parentName || "-"}</TableCell>
       <TableCell className="text-right">

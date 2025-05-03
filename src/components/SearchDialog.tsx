@@ -7,6 +7,7 @@ import { supabase } from '@/integrations/supabase/client';
 import {
   Dialog,
   DialogContent,
+  DialogTitle,
 } from '@/components/ui/dialog';
 import {
   Command,
@@ -38,18 +39,23 @@ export function SearchDialog({ open, onOpenChange }: SearchDialogProps) {
     queryFn: async () => {
       if (!searchQuery || searchQuery.trim().length < 2) return [];
       
-      const { data, error } = await supabase
-        .from('products')
-        .select('id, name, price, image, category')
-        .ilike('name', `%${searchQuery}%`)
-        .limit(8);
+      try {
+        const { data, error } = await supabase
+          .from('products')
+          .select('id, name, price, image, category')
+          .ilike('name', `%${searchQuery}%`)
+          .limit(8);
 
-      if (error) {
-        console.error("Search error:", error);
-        throw error;
+        if (error) {
+          console.error("Search error:", error);
+          throw error;
+        }
+        
+        return data as SearchResult[] || [];
+      } catch (err) {
+        console.error("Search error:", err);
+        return [];
       }
-      
-      return data as SearchResult[];
     },
     enabled: searchQuery.trim().length >= 2,
   });
@@ -66,6 +72,7 @@ export function SearchDialog({ open, onOpenChange }: SearchDialogProps) {
       if (!open) setSearchQuery('');
     }}>
       <DialogContent className="p-0">
+        <DialogTitle className="sr-only">Ürün Arama</DialogTitle>
         <Command className="rounded-lg border shadow-md">
           <CommandInput
             placeholder="Ürün ara... (en az 2 karakter)"
@@ -86,13 +93,13 @@ export function SearchDialog({ open, onOpenChange }: SearchDialogProps) {
                 <span>Aranıyor...</span>
               </div>
             </CommandEmpty>
-          ) : searchResults && searchResults.length === 0 ? (
+          ) : !searchResults || searchResults.length === 0 ? (
             <CommandEmpty className="py-6 text-center">
               "{searchQuery}" için sonuç bulunamadı
             </CommandEmpty>
           ) : (
             <CommandGroup heading="Ürünler">
-              {searchResults?.map((result) => (
+              {searchResults.map((result) => (
                 <CommandItem
                   key={result.id}
                   value={result.id}

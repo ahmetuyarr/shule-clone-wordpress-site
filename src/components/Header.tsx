@@ -33,7 +33,7 @@ const Header = () => {
           .from('menu_items')
           .select('*')
           .eq('is_active', true)
-          .eq('parent_id', null) // Sadece ana menü öğelerini al
+          .is('parent_id', null) // Use is() instead of eq() for null values
           .order('position');
           
         if (error) throw error;
