@@ -26,7 +26,17 @@ const About = () => {
           .single();
 
         if (!error && data) {
-          setPageContent(data);
+          // Ensure content is handled as an object, not a string
+          const contentObj = typeof data.content === 'string' 
+            ? JSON.parse(data.content) 
+            : (data.content || {});
+            
+          setPageContent({
+            id: data.id,
+            title: data.title,
+            page_key: data.page_key,
+            content: contentObj
+          });
         }
       } catch (error) {
         console.error("Sayfa içeriği yüklenirken hata oluştu:", error);

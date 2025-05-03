@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -34,7 +33,17 @@ const DynamicPage: React.FC = () => {
           return;
         }
 
-        setPageContent(data);
+        // Ensure content is handled as an object, not a string
+        const contentObj = typeof data.content === 'string' 
+          ? JSON.parse(data.content) 
+          : (data.content || {});
+          
+        setPageContent({
+          id: data.id,
+          title: data.title,
+          page_key: data.page_key,
+          content: contentObj
+        });
       } catch (error) {
         console.error('Sayfa içeriği yüklenirken hata oluştu:', error);
         navigate('/404');
