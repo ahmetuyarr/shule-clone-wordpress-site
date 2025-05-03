@@ -60,14 +60,12 @@ const MenuItemRow: React.FC<MenuItemRowProps> = ({
       <TableCell>
         <a 
           href={getFullLink(item.link)} 
-          className="text-blue-600 hover:underline"
+          className="text-blue-600 hover:underline flex items-center"
           target="_blank" 
           rel="noopener noreferrer"
         >
-          <span className="flex items-center">
-            {item.link}
-            <ExternalLink size={14} className="ml-1" />
-          </span>
+          {item.link}
+          <ExternalLink size={14} className="ml-1" />
         </a>
       </TableCell>
       <TableCell>{parentName || "-"}</TableCell>
