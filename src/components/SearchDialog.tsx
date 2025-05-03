@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Search, Loader2 } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
@@ -30,53 +30,69 @@ interface SearchResult {
 }
 
 export function SearchDialog({ open, onOpenChange }: SearchDialogProps) {
-  const [searchQuery, setSearchQuery] = React.useState('');
+  const [searchQuery, setSearchQuery] = useState('');
   const navigate = useNavigate();
 
   const { data: searchResults, isLoading } = useQuery({
     queryKey: ['search', searchQuery],
     queryFn: async () => {
-      if (!searchQuery) return [];
+      if (!searchQuery || searchQuery.trim().length < 2) return [];
       
       const { data, error } = await supabase
         .from('products')
         .select('id, name, price, image, category')
         .ilike('name', `%${searchQuery}%`)
-        .limit(5);
+        .limit(8);
 
-      if (error) throw error;
+      if (error) {
+        console.error("Search error:", error);
+        throw error;
+      }
+      
       return data as SearchResult[];
     },
-    enabled: searchQuery.length > 0,
+    enabled: searchQuery.trim().length >= 2,
   });
 
   const handleSelect = (productId: string) => {
     navigate(`/products/${productId}`);
     onOpenChange(false);
+    setSearchQuery('');
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={(open) => {
+      onOpenChange(open);
+      if (!open) setSearchQuery('');
+    }}>
       <DialogContent className="p-0">
         <Command className="rounded-lg border shadow-md">
           <CommandInput
-            placeholder="Ürün ara..."
+            placeholder="Ürün ara... (en az 2 karakter)"
             value={searchQuery}
             onValueChange={setSearchQuery}
+            autoFocus
           />
-          <CommandEmpty className="p-4 text-center">
-            {isLoading ? (
+          
+          {searchQuery.trim().length < 2 ? (
+            <CommandEmpty className="py-6 text-center text-sm">
+              <Search className="h-5 w-5 mx-auto mb-2 text-muted-foreground" />
+              <p>Arama yapmak için en az 2 karakter girin</p>
+            </CommandEmpty>
+          ) : isLoading ? (
+            <CommandEmpty className="py-6 text-center">
               <div className="flex items-center justify-center gap-2">
                 <Loader2 className="h-4 w-4 animate-spin" />
                 <span>Aranıyor...</span>
               </div>
-            ) : (
-              'Sonuç bulunamadı.'
-            )}
-          </CommandEmpty>
-          {searchResults && searchResults.length > 0 && (
-            <CommandGroup>
-              {searchResults.map((result) => (
+            </CommandEmpty>
+          ) : searchResults && searchResults.length === 0 ? (
+            <CommandEmpty className="py-6 text-center">
+              "{searchQuery}" için sonuç bulunamadı
+            </CommandEmpty>
+          ) : (
+            <CommandGroup heading="Ürünler">
+              {searchResults?.map((result) => (
                 <CommandItem
                   key={result.id}
                   value={result.id}

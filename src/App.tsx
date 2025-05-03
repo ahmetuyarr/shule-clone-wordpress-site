@@ -18,6 +18,7 @@ import Admin from "./pages/Admin";
 import Auth from "./pages/Auth";
 import Account from "./pages/Account";
 import Favorites from "./pages/Favorites";
+import DynamicPage from "./components/DynamicPage";
 
 const queryClient = new QueryClient();
 
@@ -41,6 +42,8 @@ const App = () => (
           <Route path="/auth" element={<Auth />} />
           <Route path="/account" element={<Account />} />
           <Route path="/favorites" element={<Favorites />} />
+          {/* Dinamik sayfa rotası */}
+          <Route path="/page/:pageKey" element={<DynamicPage />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

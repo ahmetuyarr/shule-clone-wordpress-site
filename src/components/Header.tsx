@@ -7,13 +7,44 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { SearchDialog } from './SearchDialog';
 
+interface MenuItem {
+  id: string;
+  name: string;
+  link: string;
+  parent_id: string | null;
+  position: number;
+  is_active: boolean;
+}
+
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [cartCount, setCartCount] = useState(0);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
   const navigate = useNavigate();
+
+  // Menü öğelerini yükle
+  useEffect(() => {
+    const fetchMenuItems = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('menu_items')
+          .select('*')
+          .eq('is_active', true)
+          .eq('parent_id', null) // Sadece ana menü öğelerini al
+          .order('position');
+          
+        if (error) throw error;
+        setMenuItems(data || []);
+      } catch (error) {
+        console.error('Menü öğeleri yüklenirken hata:', error);
+      }
+    };
+    
+    fetchMenuItems();
+  }, []);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -92,31 +123,38 @@ const Header = () => {
             </button>
           </div>
           <ul className="flex flex-col lg:flex-row space-y-4 lg:space-y-0 lg:space-x-6 p-6 lg:p-0">
-            <li>
-              <Link to="/" onClick={() => setIsMenuOpen(false)} className="uppercase text-sm font-medium tracking-wide shule-link">
-                Ana Sayfa
-              </Link>
-            </li>
-            <li>
-              <Link to="/products" onClick={() => setIsMenuOpen(false)} className="uppercase text-sm font-medium tracking-wide shule-link">
-                Ürünler
-              </Link>
-            </li>
-            <li>
-              <Link to="/collections" onClick={() => setIsMenuOpen(false)} className="uppercase text-sm font-medium tracking-wide shule-link">
-                Koleksiyonlar
-              </Link>
-            </li>
-            <li>
-              <Link to="/about" onClick={() => setIsMenuOpen(false)} className="uppercase text-sm font-medium tracking-wide shule-link">
-                Hakkımızda
-              </Link>
-            </li>
-            <li>
-              <Link to="/contact" onClick={() => setIsMenuOpen(false)} className="uppercase text-sm font-medium tracking-wide shule-link">
-                İletişim
-              </Link>
-            </li>
+            {/* Dinamik menü öğeleri */}
+            {menuItems.map((item) => (
+              <li key={item.id}>
+                <Link 
+                  to={item.link} 
+                  onClick={() => setIsMenuOpen(false)} 
+                  className="uppercase text-sm font-medium tracking-wide shule-link"
+                >
+                  {item.name}
+                </Link>
+              </li>
+            ))}
+            {/* Menü öğeleri yoksa statik öğeleri göster */}
+            {menuItems.length === 0 && (
+              <>
+                <li>
+                  <Link to="/" onClick={() => setIsMenuOpen(false)} className="uppercase text-sm font-medium tracking-wide shule-link">
+                    Ana Sayfa
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/products" onClick={() => setIsMenuOpen(false)} className="uppercase text-sm font-medium tracking-wide shule-link">
+                    Ürünler
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/collections" onClick={() => setIsMenuOpen(false)} className="uppercase text-sm font-medium tracking-wide shule-link">
+                    Koleksiyonlar
+                  </Link>
+                </li>
+              </>
+            )}
           </ul>
         </nav>
         
