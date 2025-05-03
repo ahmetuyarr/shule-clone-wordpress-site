@@ -18,7 +18,7 @@ import {
 import Editor from "react-simple-wysiwyg";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ExternalLink, Info, Layout, Palette, FileText, Link as LinkIcon } from "lucide-react";
+import { ExternalLink, Info, Layout, Palette, FileText, Link as LinkIcon, Eye } from "lucide-react";
 import {
   Form,
   FormControl,
