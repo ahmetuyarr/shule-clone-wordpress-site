@@ -32,6 +32,23 @@ interface PageContentFormProps {
   onClose: (refreshData?: boolean) => void;
 }
 
+const PAGE_TYPES = [
+  { value: "about", label: "Hakkımızda" },
+  { value: "contact", label: "İletişim" },
+  { value: "terms", label: "Kullanım Koşulları" },
+  { value: "privacy", label: "Gizlilik Politikası" },
+  { value: "faq", label: "Sıkça Sorulan Sorular" },
+  { value: "home", label: "Ana Sayfa" },
+  { value: "shipping", label: "Kargo Bilgileri" },
+  { value: "returns", label: "İade Politikası" },
+  { value: "sizing", label: "Beden Rehberi" },
+  { value: "products", label: "Ürünler" },
+  { value: "collections", label: "Koleksiyonlar" },
+  { value: "bestsellers", label: "Çok Satanlar" },
+  { value: "new", label: "Yeni Ürünler" },
+  { value: "custom", label: "Özel Sayfa" },
+];
+
 const PageContentForm: React.FC<PageContentFormProps> = ({
   pageContent,
   isOpen,
@@ -43,6 +60,7 @@ const PageContentForm: React.FC<PageContentFormProps> = ({
     page_key: "",
     content: {},
   });
+  const [customPageKey, setCustomPageKey] = useState("");
   const [activeTab, setActiveTab] = useState("general");
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
@@ -54,6 +72,10 @@ const PageContentForm: React.FC<PageContentFormProps> = ({
         page_key: pageContent.page_key,
         content: pageContent.content || {},
       });
+      
+      if (!PAGE_TYPES.some(pt => pt.value === pageContent.page_key)) {
+        setCustomPageKey(pageContent.page_key);
+      }
     }
   }, [pageContent]);
 
@@ -66,6 +88,11 @@ const PageContentForm: React.FC<PageContentFormProps> = ({
   };
 
   const handleSelectChange = (name: string, value: string) => {
+    if (name === "page_key" && value === "custom") {
+      // For custom page key, we'll use the customPageKey field
+      return;
+    }
+
     setFormData((prev) => ({
       ...prev,
       [name]: value,
@@ -113,9 +140,34 @@ const PageContentForm: React.FC<PageContentFormProps> = ({
           { key: "intro", label: "Giriş Metni" },
           { key: "faqs", label: "Sıkça Sorulan Sorular" },
         ];
+      case "shipping":
+        return [
+          { key: "intro", label: "Giriş Bilgisi" },
+          { key: "policies", label: "Kargo Politikaları" },
+          { key: "timeframes", label: "Teslimat Süreleri" },
+          { key: "costs", label: "Kargo Ücretleri" },
+        ];
+      case "returns":
+        return [
+          { key: "intro", label: "Giriş Bilgisi" },
+          { key: "policies", label: "İade Politikaları" },
+          { key: "process", label: "İade Süreci" },
+          { key: "conditions", label: "İade Şartları" },
+        ];
+      case "sizing":
+        return [
+          { key: "intro", label: "Giriş Bilgisi" },
+          { key: "measurements", label: "Ölçü Tablosu" },
+          { key: "guide", label: "Ölçü Alma Rehberi" },
+          { key: "tips", label: "Beden Seçme İpuçları" },
+        ];
       case "privacy":
       case "terms":
-        return [{ key: "content", label: "İçerik" }];
+      case "products":
+      case "collections":
+      case "bestsellers":
+      case "new":
+      case "custom":
       default:
         return [{ key: "content", label: "İçerik" }];
     }
@@ -131,13 +183,17 @@ const PageContentForm: React.FC<PageContentFormProps> = ({
       return false;
     }
 
-    if (!formData.page_key) {
-      toast({
-        variant: "destructive",
-        title: "Hata",
-        description: "Lütfen bir sayfa türü seçin.",
-      });
-      return false;
+    let finalPageKey = formData.page_key;
+    if (formData.page_key === "custom") {
+      if (!customPageKey.trim()) {
+        toast({
+          variant: "destructive",
+          title: "Hata",
+          description: "Özel sayfa anahtarı girmelisiniz.",
+        });
+        return false;
+      }
+      finalPageKey = customPageKey.trim().toLowerCase().replace(/\s+/g, "_");
     }
 
     return true;
@@ -148,6 +204,12 @@ const PageContentForm: React.FC<PageContentFormProps> = ({
 
     if (!validateForm()) return;
 
+    // Handle custom page key
+    let finalPageKey = formData.page_key;
+    if (formData.page_key === "custom" && customPageKey) {
+      finalPageKey = customPageKey.trim().toLowerCase().replace(/\s+/g, "_");
+    }
+
     setLoading(true);
 
     try {
@@ -157,7 +219,7 @@ const PageContentForm: React.FC<PageContentFormProps> = ({
           .from("page_contents")
           .update({
             title: formData.title,
-            page_key: formData.page_key,
+            page_key: finalPageKey,
             content: formData.content,
             updated_at: new Date().toISOString(),
           })
@@ -170,11 +232,28 @@ const PageContentForm: React.FC<PageContentFormProps> = ({
           description: "Sayfa içeriği başarıyla güncellendi.",
         });
       } else {
+        // Check if page_key already exists
+        const { data: existingPage, error: checkError } = await supabase
+          .from("page_contents")
+          .select("id")
+          .eq("page_key", finalPageKey)
+          .single();
+          
+        if (existingPage) {
+          toast({
+            variant: "destructive",
+            title: "Hata",
+            description: "Bu sayfa anahtarı zaten kullanılıyor. Lütfen başka bir anahtar seçin.",
+          });
+          setLoading(false);
+          return;
+        }
+
         // Create new page content
         const { error } = await supabase.from("page_contents").insert([
           {
             title: formData.title,
-            page_key: formData.page_key,
+            page_key: finalPageKey,
             content: formData.content,
           },
         ]);
@@ -231,23 +310,39 @@ const PageContentForm: React.FC<PageContentFormProps> = ({
               <div className="space-y-2">
                 <Label htmlFor="page_key">Sayfa Türü</Label>
                 <Select
-                  value={formData.page_key || undefined}
+                  value={PAGE_TYPES.some(pt => pt.value === formData.page_key) 
+                    ? formData.page_key 
+                    : "custom"}
                   onValueChange={(value) => handleSelectChange("page_key", value)}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Sayfa türünü seçin" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="about">Hakkımızda</SelectItem>
-                    <SelectItem value="contact">İletişim</SelectItem>
-                    <SelectItem value="terms">Kullanım Koşulları</SelectItem>
-                    <SelectItem value="privacy">Gizlilik Politikası</SelectItem>
-                    <SelectItem value="faq">Sıkça Sorulan Sorular</SelectItem>
-                    <SelectItem value="home">Ana Sayfa</SelectItem>
-                    <SelectItem value="custom">Özel Sayfa</SelectItem>
+                    {PAGE_TYPES.map(pageType => (
+                      <SelectItem key={pageType.value} value={pageType.value}>
+                        {pageType.label}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
+
+              {formData.page_key === "custom" && (
+                <div className="space-y-2">
+                  <Label htmlFor="customPageKey">Özel Sayfa Anahtarı</Label>
+                  <Input
+                    id="customPageKey"
+                    name="customPageKey"
+                    value={customPageKey}
+                    onChange={(e) => setCustomPageKey(e.target.value)}
+                    placeholder="Özel sayfa anahtarını giriniz (boşluk yerine alt çizgi kullanılacaktır)"
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Sayfa URL'de kullanılacak benzersiz bir anahtar giriniz. Örneğin: "hakkimizda", "iletisim" vb.
+                  </p>
+                </div>
+              )}
             </TabsContent>
 
             <TabsContent value="content">

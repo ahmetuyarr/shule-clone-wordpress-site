@@ -2,7 +2,7 @@
 import React from "react";
 import { TableRow, TableCell } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { ArrowUp, ArrowDown, Edit, Trash2 } from "lucide-react";
+import { Edit, Trash2, ChevronUp, ChevronDown } from "lucide-react";
 
 interface MenuItem {
   id: string;
@@ -19,60 +19,68 @@ interface MenuItemRowProps {
   isSubItem?: boolean;
   canMoveUp: boolean;
   canMoveDown: boolean;
-  onMoveUp: (item: MenuItem) => void;
-  onMoveDown: (item: MenuItem) => void;
   onEdit: (item: MenuItem) => void;
   onDelete: (itemId: string) => void;
+  onMoveUp: (item: MenuItem) => void;
+  onMoveDown: (item: MenuItem) => void;
 }
 
 const MenuItemRow: React.FC<MenuItemRowProps> = ({
   item,
-  parentName = "Ana Menü",
+  parentName,
   isSubItem = false,
   canMoveUp,
   canMoveDown,
+  onEdit,
+  onDelete,
   onMoveUp,
   onMoveDown,
-  onEdit,
-  onDelete
 }) => {
   return (
-    <TableRow className={`${!item.is_active ? "opacity-60" : ""} ${isSubItem ? "bg-gray-50" : ""}`}>
-      <TableCell className={`${isSubItem ? "pl-8" : ""} font-medium`}>
-        {isSubItem ? `- ${item.name}` : item.name}
+    <TableRow>
+      <TableCell>
+        <div className={`flex items-center ${isSubItem ? "pl-6" : ""}`}>
+          {isSubItem && (
+            <span className="text-xs text-gray-500 mr-2">└</span>
+          )}
+          <span className={`font-medium ${!item.is_active ? "text-gray-400" : ""}`}>
+            {item.name}
+            {!item.is_active && <span className="ml-2 text-xs">(Pasif)</span>}
+          </span>
+        </div>
       </TableCell>
-      <TableCell>{item.link}</TableCell>
-      <TableCell>{parentName}</TableCell>
+      <TableCell>
+        <span className="text-blue-600 hover:underline">
+          <a href={item.link.startsWith("http") ? item.link : `/${item.link}`} target="_blank" rel="noopener noreferrer">
+            {item.link}
+          </a>
+        </span>
+      </TableCell>
+      <TableCell>{parentName || "-"}</TableCell>
       <TableCell className="text-right">
-        <div className="flex justify-end gap-2">
-          <Button 
-            variant="outline" 
+        <div className="flex justify-end gap-1">
+          <Button
+            variant="ghost"
             size="icon"
             onClick={() => onMoveUp(item)}
             disabled={!canMoveUp}
+            className={!canMoveUp ? "opacity-30" : ""}
           >
-            <ArrowUp size={16} />
+            <ChevronUp size={16} />
           </Button>
-          <Button 
-            variant="outline" 
+          <Button
+            variant="ghost"
             size="icon"
             onClick={() => onMoveDown(item)}
             disabled={!canMoveDown}
+            className={!canMoveDown ? "opacity-30" : ""}
           >
-            <ArrowDown size={16} />
+            <ChevronDown size={16} />
           </Button>
-          <Button 
-            variant="outline" 
-            size="icon"
-            onClick={() => onEdit(item)}
-          >
+          <Button variant="outline" size="icon" onClick={() => onEdit(item)}>
             <Edit size={16} />
           </Button>
-          <Button 
-            variant="outline" 
-            size="icon"
-            onClick={() => onDelete(item.id)}
-          >
+          <Button variant="outline" size="icon" onClick={() => onDelete(item.id)}>
             <Trash2 size={16} />
           </Button>
         </div>

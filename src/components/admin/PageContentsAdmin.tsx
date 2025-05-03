@@ -1,13 +1,15 @@
+
 import React, { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { PlusCircle, Edit, Trash2 } from "lucide-react";
+import { PlusCircle, Edit, Trash2, Eye } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useToast } from "@/hooks/use-toast";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import PageContentForm from "@/components/admin/PageContentForm";
+import { Link } from "react-router-dom";
 
 interface PageContent {
   id: string;
@@ -126,8 +128,24 @@ const PageContentsAdmin = () => {
         return 'Sıkça Sorulan Sorular';
       case 'home':
         return 'Ana Sayfa';
+      case 'shipping':
+        return 'Kargo Bilgileri';
+      case 'returns':
+        return 'İade Politikası';
+      case 'sizing':
+        return 'Beden Rehberi';
       default:
         return pageKey;
+    }
+  };
+
+  const getPageUrl = (pageKey: string): string => {
+    switch (pageKey) {
+      case 'about':
+      case 'contact':
+        return `/${pageKey}`;
+      default:
+        return `/page/${pageKey}`;
     }
   };
 
@@ -166,6 +184,15 @@ const PageContentsAdmin = () => {
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-2">
+                        <Button 
+                          variant="outline" 
+                          size="icon"
+                          asChild
+                        >
+                          <Link to={getPageUrl(pageContent.page_key)} target="_blank">
+                            <Eye size={16} />
+                          </Link>
+                        </Button>
                         <Button 
                           variant="outline" 
                           size="icon"

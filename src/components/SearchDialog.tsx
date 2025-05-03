@@ -107,7 +107,7 @@ export function SearchDialog({ open, onOpenChange }: SearchDialogProps) {
                   <div className="flex flex-col">
                     <span className="font-medium">{result.name}</span>
                     <span className="text-sm text-muted-foreground">
-                      {result.category} - {result.price.toLocaleString('tr-TR', { style: 'currency', currency: 'TRY' })}
+                      {result.category} - {result.price.toLocaleString('tr-TR')} ₺
                     </span>
                   </div>
                 </CommandItem>

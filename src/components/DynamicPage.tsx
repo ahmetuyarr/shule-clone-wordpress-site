@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -59,7 +60,7 @@ const DynamicPage: React.FC = () => {
 
   // HTML içeriği güvenli bir şekilde render et
   const renderHtmlContent = (html: string) => {
-    return { __html: html };
+    return { __html: html || '' };
   };
 
   if (loading) {
@@ -171,7 +172,7 @@ const DynamicPage: React.FC = () => {
             
             <div>
               {content.map && (
-                <div className="mb-8" dangerouslySetInnerHTML={renderHtmlContent(content.map)} />
+                <div className="mb-8 w-full h-[400px]" dangerouslySetInnerHTML={renderHtmlContent(content.map)} />
               )}
             </div>
           </div>
@@ -189,9 +190,103 @@ const DynamicPage: React.FC = () => {
             )}
           </div>
         );
+
+      case 'shipping':
+        return (
+          <div className="space-y-8">
+            {content.intro && (
+              <div className="mb-8" dangerouslySetInnerHTML={renderHtmlContent(content.intro)} />
+            )}
+            
+            {content.policies && (
+              <div className="py-6">
+                <h2 className="text-2xl font-semibold mb-4">Kargo Politikalarımız</h2>
+                <div dangerouslySetInnerHTML={renderHtmlContent(content.policies)} />
+              </div>
+            )}
+            
+            {content.timeframes && (
+              <div className="py-6">
+                <h2 className="text-2xl font-semibold mb-4">Teslimat Süreleri</h2>
+                <div dangerouslySetInnerHTML={renderHtmlContent(content.timeframes)} />
+              </div>
+            )}
+            
+            {content.costs && (
+              <div className="py-6">
+                <h2 className="text-2xl font-semibold mb-4">Kargo Ücretleri</h2>
+                <div dangerouslySetInnerHTML={renderHtmlContent(content.costs)} />
+              </div>
+            )}
+          </div>
+        );
+        
+      case 'returns':
+        return (
+          <div className="space-y-8">
+            {content.intro && (
+              <div className="mb-8" dangerouslySetInnerHTML={renderHtmlContent(content.intro)} />
+            )}
+            
+            {content.policies && (
+              <div className="py-6">
+                <h2 className="text-2xl font-semibold mb-4">İade Politikalarımız</h2>
+                <div dangerouslySetInnerHTML={renderHtmlContent(content.policies)} />
+              </div>
+            )}
+            
+            {content.process && (
+              <div className="py-6">
+                <h2 className="text-2xl font-semibold mb-4">İade Süreci</h2>
+                <div dangerouslySetInnerHTML={renderHtmlContent(content.process)} />
+              </div>
+            )}
+            
+            {content.conditions && (
+              <div className="py-6">
+                <h2 className="text-2xl font-semibold mb-4">İade Şartları</h2>
+                <div dangerouslySetInnerHTML={renderHtmlContent(content.conditions)} />
+              </div>
+            )}
+          </div>
+        );
+        
+      case 'sizing':
+        return (
+          <div className="space-y-8">
+            {content.intro && (
+              <div className="mb-8" dangerouslySetInnerHTML={renderHtmlContent(content.intro)} />
+            )}
+            
+            {content.measurements && (
+              <div className="py-6">
+                <h2 className="text-2xl font-semibold mb-4">Ölçü Tablosu</h2>
+                <div dangerouslySetInnerHTML={renderHtmlContent(content.measurements)} />
+              </div>
+            )}
+            
+            {content.guide && (
+              <div className="py-6">
+                <h2 className="text-2xl font-semibold mb-4">Ölçü Alma Rehberi</h2>
+                <div dangerouslySetInnerHTML={renderHtmlContent(content.guide)} />
+              </div>
+            )}
+            
+            {content.tips && (
+              <div className="py-6">
+                <h2 className="text-2xl font-semibold mb-4">Beden Seçme İpuçları</h2>
+                <div dangerouslySetInnerHTML={renderHtmlContent(content.tips)} />
+              </div>
+            )}
+          </div>
+        );
         
       case 'privacy':
       case 'terms':
+      case 'products':
+      case 'collections':
+      case 'bestsellers':
+      case 'new':
       default:
         // Varsayılan düzen - genel içerik
         return (
