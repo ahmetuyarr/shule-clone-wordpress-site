@@ -103,7 +103,7 @@ export const usePageContentForm = ({ pageContent, onClose }: UsePageContentFormP
     }
   };
 
-  const handleContentChange = (sectionKey: string, value: string) => {
+  const handleContentChange = (sectionKey: string, value: any) => {
     setFormData((prev) => ({
       ...prev,
       content: {

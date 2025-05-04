@@ -85,7 +85,11 @@ const PageContentForm: React.FC<PageContentFormProps> = ({
                 </TabsContent>
 
                 <TabsContent value="design">
-                  <DesignTab />
+                  <DesignTab 
+                    pageKey={formData.page_key}
+                    content={formData.content}
+                    onContentChange={handleContentChange}
+                  />
                 </TabsContent>
               </Tabs>
             </div>
