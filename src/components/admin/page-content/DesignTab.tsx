@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { 
   Image, Layout, FileText, Eye, Type, Link as LinkIcon, 
-  FormInput, PanelLeft, MoveHorizontal, Square, Button as ButtonIcon 
+  FormInput, PanelLeft, MoveHorizontal, Square, CircleUser
 } from "lucide-react";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import { Button } from "@/components/ui/button";
@@ -65,7 +65,7 @@ const DesignTab: React.FC<DesignTabProps> = ({
       id: "button", 
       type: "button", 
       content: { text: "Buton", link: "/", variant: "default" },
-      icon: <ButtonIcon size={20} />,
+      icon: <CircleUser size={20} />,
       label: "Buton"
     },
     { 
