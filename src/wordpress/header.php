@@ -129,5 +129,17 @@
                 menuOverlay.classList.add('hidden');
             });
         }
+
+        // Aynı sayfaya tıklanırsa olayı engelle
+        document.querySelectorAll('#primary-menu a').forEach(function(link) {
+            link.addEventListener('click', function(e) {
+                const currentPath = window.location.pathname;
+                const linkPath = new URL(link.href).pathname;
+                
+                if (currentPath === linkPath) {
+                    e.preventDefault();
+                }
+            });
+        });
     });
 </script>

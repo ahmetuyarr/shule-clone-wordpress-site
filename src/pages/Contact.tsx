@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import { Link } from "react-router-dom";
 
 interface PageContent {
   id: string;
@@ -61,9 +62,9 @@ const Contact = () => {
         <div className="bg-shule-lightGrey py-3">
           <div className="shule-container">
             <nav className="flex items-center flex-wrap">
-              <a href="/" className="shule-link">
+              <Link to="/" className="shule-link">
                 Ana Sayfa
-              </a>
+              </Link>
               <span className="mx-1">/</span>
               <span>İletişim</span>
             </nav>

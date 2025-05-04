@@ -1,6 +1,6 @@
 
 import React, { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import Header from './Header';
 import Footer from './Footer';
@@ -311,9 +311,9 @@ const DynamicPage: React.FC = () => {
         <div className="bg-shule-lightGrey py-3">
           <div className="shule-container">
             <nav className="flex items-center flex-wrap">
-              <a href="/" className="shule-link">
+              <Link to="/" className="shule-link">
                 Ana Sayfa
-              </a>
+              </Link>
               <span className="mx-1">/</span>
               <span>{pageContent.title}</span>
             </nav>

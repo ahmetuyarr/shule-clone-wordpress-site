@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { ShoppingBag, Search, Menu, X, User, Heart } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
@@ -24,6 +24,7 @@ const Header = () => {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
   const navigate = useNavigate();
+  const location = useLocation(); // URL'yi takip etmek için kullanılır
 
   // Menü öğelerini yükle
   useEffect(() => {
@@ -100,6 +101,19 @@ const Header = () => {
     }
   };
 
+  // URL'yi kontrol eden yardımcı fonksiyon
+  const handleNavigation = (path: string, event: React.MouseEvent) => {
+    // Eğer şu anki konum ile gidilecek konum aynı ise, olayı engelleyelim
+    if (location.pathname === path) {
+      event.preventDefault();
+      // İsteğe bağlı olarak sayfayı yenileyebiliriz veya başka bir işlem yapabiliriz
+      // window.location.reload(); // Sayfayı yenilemek isterseniz
+      return;
+    }
+    
+    setIsMenuOpen(false); // Menüyü kapatalım
+  };
+
   return (
     <header className={`fixed top-0 left-0 right-0 bg-white z-50 border-b border-gray-200 ${isScrolled ? 'shadow-sm' : ''}`}>
       <div className="shule-container flex items-center justify-between py-4">
@@ -128,7 +142,7 @@ const Header = () => {
               <li key={item.id}>
                 <Link 
                   to={item.link} 
-                  onClick={() => setIsMenuOpen(false)} 
+                  onClick={(e) => handleNavigation(item.link, e)} 
                   className="uppercase text-sm font-medium tracking-wide shule-link"
                 >
                   {item.name}
@@ -139,17 +153,29 @@ const Header = () => {
             {menuItems.length === 0 && (
               <>
                 <li>
-                  <Link to="/" onClick={() => setIsMenuOpen(false)} className="uppercase text-sm font-medium tracking-wide shule-link">
+                  <Link 
+                    to="/" 
+                    onClick={(e) => handleNavigation("/", e)} 
+                    className="uppercase text-sm font-medium tracking-wide shule-link"
+                  >
                     Ana Sayfa
                   </Link>
                 </li>
                 <li>
-                  <Link to="/products" onClick={() => setIsMenuOpen(false)} className="uppercase text-sm font-medium tracking-wide shule-link">
+                  <Link 
+                    to="/products" 
+                    onClick={(e) => handleNavigation("/products", e)} 
+                    className="uppercase text-sm font-medium tracking-wide shule-link"
+                  >
                     Ürünler
                   </Link>
                 </li>
                 <li>
-                  <Link to="/collections" onClick={() => setIsMenuOpen(false)} className="uppercase text-sm font-medium tracking-wide shule-link">
+                  <Link 
+                    to="/collections" 
+                    onClick={(e) => handleNavigation("/collections", e)} 
+                    className="uppercase text-sm font-medium tracking-wide shule-link"
+                  >
                     Koleksiyonlar
                   </Link>
                 </li>
